@@ -1,16 +1,18 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef COLORHIST_H
+#define COLORHIST_H
 
-Class ColorHist {
+class ColorHist {
  public :
+  ColorHist();
+
   ColorHist(char* file_image);
 
-  int getColor(int r, int g, int b);
+  int getColor(Color c) const;
 
-  void addColor(int r, int g, int b);
+  void addColor(Color c);
 
  private :
-  vector < vector < vector <int> > > rgbSpace;
-}
+  int[][][] rgbSpace;
+};
 
 #endif
