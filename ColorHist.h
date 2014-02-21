@@ -12,10 +12,12 @@ class ColorHist {
 
   int getColor(Color c) const;
 
+  int getColor(int r, int g, int b) const;
+
   void addColor(Color c);
 
  private :
-  int rgbSpace[COLOR_RANGE][COLOR_RANGE][COLOR_RANGE];
+  int* rgbSpace; // Color space, 3-dimensional int array
 };
 
 #endif
