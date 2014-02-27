@@ -1,11 +1,27 @@
 #include "ColorHist.h"
+#include "Color.h"
 #include "CImg-1.5.7/CImg.h"
 #include <iostream>
 
 using namespace cimg_library;
 
 ColorHist::ColorHist() {
-  rgbSpace = new int[COLOR_RANGE][COLOR_RANGE][COLOR_RANGE];
+  // rgbSpace = new ;
+  
+  // tab[10]
+  // *(tab+10)
+  // tab=(int*)malloc(nb_elements*sizeof(int));
+
+  /* The C way
+  rgbSpace = (int***) malloc(COLOR_RANGE*sizeof(int**));  
+  for(int i=0; i < COLOR_RANGE; i++) {
+    rgbSpace[i] = (int**) malloc(COLOR_RANGE*sizeof(int*));
+    for(int j=0; j < COLOR_RANGE; j++) {
+      rgbSpace[i][j] = (int*) malloc(COLOR_RANGE*sizeof(int));
+    }
+  }
+  */
+  
 }
 
 ColorHist::~ColorHist() {
