@@ -10,6 +10,8 @@ class Color {
   int getR() const;
   int getG() const;
   int getB() const;
+  
+  double distance(Color const& c1, Color const& c2) const;
 
  private :
   int r;

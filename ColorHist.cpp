@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace cimg_library;
+using namespace std;
 
 ColorHist::ColorHist() {
   // rgbSpace = new ;
@@ -21,20 +22,27 @@ ColorHist::ColorHist() {
     }
   }
   */
-  
+  rgbSpace[COLOR_RANGE][COLOR_RANGE][COLOR_RANGE];
+  cout << "Initialisation";
+  cout.flush();
+
+  rgbSpace[0][0][0] = 1;
+  cout << "Initialisé";
 }
 
+/*
 ColorHist::~ColorHist() {
   delete[][][] rgbSpace;
 }
+*/
 
 int ColorHist::getColor(Color c) const {
-  std::cout << c.getR() + 1000*(c.getG() + 1000*c.getB());
+  cout << c.getR() << "," << c.getG() << "," << c.getB() << endl;
   return this->rgbSpace[c.getR()][c.getG()][c.getB()];
 }
 
 int ColorHist::getColor(int r, int g, int b) const {
-  std::cout << r + 1000*(g + 1000*b);
+  cout << r << "," << g << "," << b << endl;
   return this->rgbSpace[r][g][b];
 }
 
