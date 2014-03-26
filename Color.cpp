@@ -1,5 +1,25 @@
 #include "Color.h"
 #include <math.h>
+
+
+Color::Color() {}
+
+Color::Color(int rVal, int gVal, int bVal) : r(rVal), g(gVal), b(bVal) {
+}
+
+int Color::getR() const {
+  return this->r;
+}
+
+int Color::getG() const {
+  return this->g;
+}
+
+int Color::getB() const {
+  return this->b;
+}
+
+double Color::distance(Color const& c1, Color const& c2) const {
   /*
     typedef struct {
     unsigned char r, g, b;
