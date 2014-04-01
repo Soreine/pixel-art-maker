@@ -20,8 +20,5 @@ int main() {
   assert(ch.getColor(0,0,0)==1);
   assert(ch.getColor(Color(0,0,0))==1);
 
-  int x;
-  cin >> x;
-
   return 0;
 }
