@@ -5,18 +5,18 @@ class Color {
  public :
   Color();
 
-  Color(int r, int g, int b);
+  Color(unsigned char r, unsigned char g, unsigned char b);
 
-  int getR() const;
-  int getG() const;
-  int getB() const;
+  unsigned char getR() const;
+  unsigned char getG() const;
+  unsigned char getB() const;
   
   double distance(Color const& c1, Color const& c2) const;
 
  private :
-  int r;
-  int g;
-  int b;
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
 };
 
 #endif

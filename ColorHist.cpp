@@ -16,11 +16,11 @@ ColorHist::~ColorHist() {
 }
 
 
-int ColorHist::getColor(Color c) const {
+unsigned int ColorHist::getColor(Color c) const {
   return this->rgbSpace[c.getR()][c.getG()][c.getB()];
 }
 
-int ColorHist::getColor(int r, int g, int b) const {
+unsigned int ColorHist::getColor(unsigned char r, unsigned  char g, unsigned  char b) const {
   return this->rgbSpace[r][g][b];
 }
 

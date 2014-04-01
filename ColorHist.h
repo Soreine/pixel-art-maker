@@ -5,18 +5,19 @@
 
 class Color;
 
-int const COLOR_RANGE = 256;
+unsigned int const COLOR_RANGE = 256;
 
-typedef int tab2d[COLOR_RANGE][COLOR_RANGE];
+typedef unsigned int tab2d[COLOR_RANGE][COLOR_RANGE];
+
 class ColorHist {
  public :
   ColorHist();
   
   ~ColorHist();
 
-  int getColor(Color c) const;
+  unsigned int getColor(Color c) const;
   
-  int getColor(int r, int g, int b) const;
+  unsigned int getColor(unsigned char r, unsigned char g, unsigned char b) const;
   
   void addColor(Color c);
   

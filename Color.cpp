@@ -4,18 +4,18 @@
 
 Color::Color() {}
 
-Color::Color(int rVal, int gVal, int bVal) : r(rVal), g(gVal), b(bVal) {
+Color::Color(unsigned char rVal, unsigned char gVal, unsigned char bVal) : r(rVal), g(gVal), b(bVal) {
 }
 
-int Color::getR() const {
+unsigned char Color::getR() const {
   return this->r;
 }
 
-int Color::getG() const {
+unsigned char Color::getG() const {
   return this->g;
 }
 
-int Color::getB() const {
+unsigned char Color::getB() const {
   return this->b;
 }
 
