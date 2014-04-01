@@ -7,42 +7,20 @@ using namespace cimg_library;
 using namespace std;
 
 ColorHist::ColorHist() {
-  // rgbSpace = new ;
-  
-  // tab[10]
-  // *(tab+10)
-  // tab=(int*)malloc(nb_elements*sizeof(int));
-
-  /* The C way
-  rgbSpace = (int***) malloc(COLOR_RANGE*sizeof(int**));  
-  for(int i=0; i < COLOR_RANGE; i++) {
-    rgbSpace[i] = (int**) malloc(COLOR_RANGE*sizeof(int*));
-    for(int j=0; j < COLOR_RANGE; j++) {
-      rgbSpace[i][j] = (int*) malloc(COLOR_RANGE*sizeof(int));
-    }
-  }
-  */
-  rgbSpace[COLOR_RANGE][COLOR_RANGE][COLOR_RANGE];
-  cout << "Initialisation";
-  cout.flush();
-
-  rgbSpace[0][0][0] = 1;
-  cout << "Initialisé";
+  rgbSpace = new tab2d[COLOR_RANGE];
 }
 
-/*
+
 ColorHist::~ColorHist() {
-  delete[][][] rgbSpace;
+  delete[] rgbSpace;
 }
-*/
+
 
 int ColorHist::getColor(Color c) const {
-  cout << c.getR() << "," << c.getG() << "," << c.getB() << endl;
   return this->rgbSpace[c.getR()][c.getG()][c.getB()];
 }
 
 int ColorHist::getColor(int r, int g, int b) const {
-  cout << r << "," << g << "," << b << endl;
   return this->rgbSpace[r][g][b];
 }
 
