@@ -17,9 +17,6 @@ int main() {
   assert(Color::distance(c, Color(2,4,6))==sqrt(14));
 
 
-
-
-  
   cout << "Test ColorHist" << endl;
 
   ColorHist ch;
@@ -34,6 +31,9 @@ int main() {
 
   assert(ch.getColor(0,0,0)==1);
   assert(ch.getColor(Color(0,0,0))==1);
+
+  cout << "Color(1,2,3)" << endl;
+  cout << Color(1,2,3) << endl;
 
   return 0;
 }

@@ -20,7 +20,7 @@ class ColorHist {
   unsigned int getColor(unsigned char r, unsigned char g, unsigned char b) const;
   
   bool addColor(Color c);
-  
+
  private :
   // Map to store number of pixel of each color.
   tab2d *rgbSpace;

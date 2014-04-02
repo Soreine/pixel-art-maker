@@ -1,6 +1,8 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+#include <ostream>
+
 class Color {
  public :
   Color();
@@ -18,5 +20,7 @@ class Color {
   unsigned char g;
   unsigned char b;
 };
+
+std::ostream & operator<<(std::ostream &, const Color &);
 
 #endif

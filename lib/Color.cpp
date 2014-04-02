@@ -1,6 +1,6 @@
 #include "Color.h"
 #include <math.h>
-
+#include <ostream>
 
 Color::Color() {}
 
@@ -50,4 +50,9 @@ double Color::distance(Color const& c1, Color const& c2){
 
   return sqrt(r*r + g*g + b*b);
 
+}
+
+
+std::ostream& operator<<(std::ostream &strm, const Color &c) {
+  return strm << "Color(" << (int) c.getR() << "," << (int) c.getG() << "," <<  (int) c.getB() << ")";
 }

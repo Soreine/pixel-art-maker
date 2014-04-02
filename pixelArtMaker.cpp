@@ -14,7 +14,7 @@ using namespace cimg_library;
   
 */
 
-class Point {
+struct point {
   Color color;
   unsigned int cluster;
 };
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]) {
   cout << "============================" << endl;
   cout << "Bienvenue dans PixelArtMaker" << endl;
 
-  list<Point> colorList;
+  list<point> pointList;
 
   Color kmean[K];
   
@@ -51,17 +51,25 @@ int main(int argc, char* argv[]) {
 
   CImg<unsigned char> image(file);
   
-  Color c;
+  point p;
 
   /* Remplir l'histogramme et la liste des couleurs. */
   for (int i = 0 ; i < image.height() ; i++) {
     for (int j = 0 ; j < image.width() ; j++) {
-      c = getPixel(i, j, image);
-      if (!ch.addColor(c))
-	colorList.add6
+      p = {getPixel(i, j, image), 0};
+      if (!ch.addColor(p.color))
+	pointList.push_front(p);
     }
   }
 
+  Color c;
+
+  for (list<point>::iterator iterator = pointList.begin() ; 
+       iterator != pointList.end() ; 
+       iterator++) {
+    c = *iterator.color;
+    cout << c << "\t" << ch.getColor(c) << endl;
+  }
 
   return 0;
 }

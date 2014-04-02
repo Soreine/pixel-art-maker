@@ -25,5 +25,3 @@ unsigned int ColorHist::getColor(unsigned char r, unsigned  char g, unsigned  ch
 bool ColorHist::addColor(Color c) {
   return this->rgbSpace[c.getR()][c.getG()][c.getB()]++;
 }
-
-
