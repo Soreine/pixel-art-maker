@@ -1,6 +1,7 @@
 SOURCES = ColorHist.cpp \
 	Color.cpp \
-	TestColorHist.cpp
+	TestColorHist.cpp \
+	Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = TestColorHist
