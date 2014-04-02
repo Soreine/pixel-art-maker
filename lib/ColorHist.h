@@ -19,7 +19,7 @@ class ColorHist {
   
   unsigned int getColor(unsigned char r, unsigned char g, unsigned char b) const;
   
-  void addColor(Color c);
+  bool addColor(Color c);
   
  private :
   // Map to store number of pixel of each color.

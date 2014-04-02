@@ -11,7 +11,7 @@ class Color {
   unsigned char getG() const;
   unsigned char getB() const;
   
-  double distance(Color const& c1, Color const& c2) const;
+  static double distance(Color const& c1, Color const& c2);
 
  private :
   unsigned char r;

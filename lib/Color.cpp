@@ -19,7 +19,7 @@ unsigned char Color::getB() const {
   return this->b;
 }
 
-double Color::distance(Color const& c1, Color const& c2) const {
+double Color::distance(Color const& c1, Color const& c2){
   /*
     typedef struct {
     unsigned char r, g, b;
@@ -35,10 +35,19 @@ double Color::distance(Color const& c1, Color const& c2) const {
     }
   */
 
+  /*
   long rmean = ((long) c1.getR() + (long) c2.getR())/2;
   long r = (long) c1.getR() - (long) c2.getR();
   long g = (long) c1.getG() - (long) c2.getG();
   long b = (long) c1.getB() - (long) c2.getB();
 
   return sqrt((((512 + rmean)*r*r)>>8) + 4<<g*g + (((767-rmean)*b*b)>>8));
+  */
+
+  long r = (long) c1.getR() - (long) c2.getR();
+  long g = (long) c1.getG() - (long) c2.getG();
+  long b = (long) c1.getB() - (long) c2.getB();
+
+  return sqrt(r*r + g*g + b*b);
+
 }

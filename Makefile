@@ -1,14 +1,16 @@
-SOURCES = ColorHist.cpp \
-	Color.cpp \
-	TestColorHist.cpp
+SOURCES = pixelArtMaker.cpp \
+	  lib/ColorHist.cpp \
+	  lib/Color.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
-TARGET = TestColorHist
+TARGET = pixelArtMaker
+
+OPTIONS = -I.. -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -lX11 
 
 all: $(OBJECTS)
-	g++ -g -o $(TARGET) $(OBJECTS)
+	g++ -g -o $(TARGET) $(OBJECTS) $(OPTIONS)
 %o: %cpp
-	g++ -g -o  $@ -c $<
+	g++ -g -o  $@ -c $< 
 
 clean:
 	rm -rf $(OBJECTS)
