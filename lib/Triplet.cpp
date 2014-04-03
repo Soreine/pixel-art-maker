@@ -17,6 +17,13 @@ void Triplet::add(Triplet const& t) {
   values[2] += t.values[2];
 }
 
+
+void Triplet::addMultiply(Color const& c, unsigned int m) {
+  values[0] += m*c.getR();
+  values[1] += m*c.getG();
+  values[2] += m*c.getB();
+}
+
 void Triplet::divide(long d) {
   values[0] = lround((double)values[0]/(double)d);
   values[1] = lround((double)values[1]/(double)d);

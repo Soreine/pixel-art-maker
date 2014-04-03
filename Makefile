@@ -1,6 +1,7 @@
 SOURCES = pixelArtMaker.cpp \
 	  lib/ColorHist.cpp \
-	  lib/Color.cpp
+	  lib/Color.cpp \
+	  lib/Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 TARGET = pixelArtMaker

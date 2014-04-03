@@ -8,6 +8,7 @@ using namespace cimg_library;
 #include <string>
 #include "lib/ColorHist.h"
 #include "lib/Color.h"
+#include "lib/Triplet.h"
 
 /*
   pixelArtMaker "file" nb_color
@@ -65,7 +66,7 @@ int main(int argc, char* argv[]) {
   Color c;
 
   
-  CImgDisplay orig_disp(image, "Original"), visu_disp(visu, "Test");
+  CImgDisplay orig_disp(image, "Original"), visu_disp(visu, "Resultat");
 
   /*  
   //TEST
@@ -98,12 +99,12 @@ int main(int argc, char* argv[]) {
   ////////////////// K-Mean ////////////////////////
 
 
-  // Initialiser les clusters avec des couleurs aléatoires.
+  // Initialiser les clusters avec des couleurs de l'image.
   list<point>::iterator iterator = pointList.begin();
   bool enoughColors = true;
 
   for(int i = 0 ; i < K ; i++) {
-    if (iterator = pointList.end()) {
+    if (iterator == pointList.end()) {
       enoughColors = false;
       break;
     }
@@ -118,15 +119,19 @@ int main(int argc, char* argv[]) {
     unsigned int nearest;
     double nearestDist;
     double dist;
-    int clusterWeight[K];
+    unsigned long clusterWeight[K];
+    unsigned long m;
     Triplet nextKMean[K];
 
     while(!unchanged) {
-      
+
       for (int i = 0 ; i < K ; i++ ) {
-	nextKMean[i] = Color(0,0,0);
+	nextKMean[i] = Triplet(0,0,0);
+	clusterWeight[i] = 0;
       }
     
+      cout << "Initialisation des nextKMean" << endl;
+
       // Mettre à jour les clusters
       for (list<point>::iterator iterator = pointList.begin() ; 
 	   iterator != pointList.end() ; iterator++) {
@@ -144,18 +149,82 @@ int main(int argc, char* argv[]) {
 	}
       
 	(*iterator).cluster = nearest;
+
+	// Calculer les prochaines moyennes
+	m = ch.getColor(c);
+
+	nextKMean[nearest].addMultiply(c, m);
+	clusterWeight[nearest] += m;
+
       }
 
-      // Mettre à jour les moyennes    
+      cout << "Toutes les couleurs traitées" << endl;
+	
 
+      /*
       for (list<point>::iterator iterator = pointList.begin() ; 
 	   iterator != pointList.end() ; iterator++) {
-	c = (*iterator).color;
+
+	// Mettre à jour les moyennes    
 	
-	kmean[(*iterator).cluster].add(c);
+	c = (*iterator).color;
+	m = ch.getColor(c);
+
+	nextKMean[(*iterator).cluster].addMultiply(c, m);
+	clusterWeight[(*iterator).cluster] += m;
+      }
+      */
+
+
+      // Diviser les moyennes par leur poids.  Mettre à jour les
+      // moyennes et vérifier si elles ont changé.
+      
+      unchanged = true;
+      for (int i = 0 ; i < K ; i++ ) {
+	nextKMean[i].divide(clusterWeight[i]);
+	
+	c = nextKMean[i].getColor();
+	unchanged = unchanged &&
+	  (c.getR() == kmean[i].getR()) &&
+	  (c.getG() == kmean[i].getG()) &&
+	  (c.getB() == kmean[i].getB());
+      }
+    
+    // Afficher les moyennes
+    for (int i = 0 ; i < K ; i++ ) {
+      c = kmean[i];
+      for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
+	for (int k = 0 ; k < image.width() ; k++) {
+	  visu(j, k, 0) = c.getR();
+	  visu(j, k, 1) = c.getG();
+	  visu(j, k, 2) = c.getB();
+	}
+      }
+    }
+
+    }
+    
+
+
+    // Afficher les moyennes
+    for (int i = 0 ; i < K ; i++ ) {
+      c = kmean[i];
+      for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
+	for (int k = 0 ; k < image.width() ; k++) {
+	  visu(j, k, 0) = c.getR();
+	  visu(j, k, 1) = c.getG();
+	  visu(j, k, 2) = c.getB();
+	}
       }
     }
     
+    visu.display(visu_disp);
+    while(!orig_disp.is_closed() && !visu_disp.is_closed()) {
+      orig_disp.wait();
+      
+    }
+
+
   } else {
     cout << "L'image originale contient moins de couleur que le nombre demandé." << endl;
   }

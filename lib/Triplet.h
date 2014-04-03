@@ -13,6 +13,8 @@ class Triplet {
 
   void add(Triplet const& t);
 
+  void addMultiply(Color const& c, unsigned int m);
+
   void divide(long d);
 
   Color getColor() const;
