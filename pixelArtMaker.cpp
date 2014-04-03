@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
   list<point> pointList;
   Color kmean[K];
   ColorHist ch;
-  
+  Color c;
   point p;
 
   // TODO
@@ -53,85 +53,75 @@ int main(int argc, char* argv[]) {
 
   CImg<unsigned char> image(file);
   CImg<unsigned char> visu(image.width(), image.height(), 1, 3, 0);
+  CImgDisplay orig_disp(image, "Original"), visu_disp(visu, "Resultat");
+
+
 
   /* Remplir l'histogramme et la liste des couleurs. */
   for (int i = 0 ; i < image.height() ; i++) {
     for (int j = 0 ; j < image.width() ; j++) {
-      p = {getPixel(i, j, image), 0}; //WARNING -std=c++11
+      p = {getPixel(j, i, image), 0}; //WARNING -std=c++11
       if (!ch.addColor(p.color))
 	pointList.push_front(p);
     }
   }
 
-  Color c;
-
-  
-  CImgDisplay orig_disp(image, "Original"), visu_disp(visu, "Resultat");
-
-  /*  
-  //TEST
-  int x = 0, y = 0;
-
-  for (list<point>::iterator iterator = pointList.begin() ; 
-  iterator != pointList.end() ; 
-  iterator++) {
-  c = (*iterator).color;
-  for (int j = 0; j < ch.getColor(c); j++) {
-  visu(x, y, 0) = c.getR();
-  visu(x, y, 1) = c.getG();
-  visu(x, y, 2) = c.getB();
-      
-  if(x++ > image.width()) {
-  x = 0;
-  y++;
-  }
-  // cout << c << "\t" << ch.getColor(c) << endl;
-  }
-  }
-
-  visu.display(visu_disp);
-  while(!orig_disp.is_closed() && !visu_disp.is_closed()) {
-  orig_disp.wait();
-  }
-
-  */
-
   ////////////////// K-Mean ////////////////////////
+
 
 
   // Initialiser les clusters avec des couleurs de l'image.
   list<point>::iterator iterator = pointList.begin();
   bool enoughColors = true;
-
-  for(int i = 0 ; i < K ; i++) {
-    if (iterator == pointList.end()) {
-      enoughColors = false;
-      break;
+  kmean[0] = c = (*iterator).color;
+  { 
+    int i = 1;
+    while (i < K) {
+      if (iterator == pointList.end()) {
+	enoughColors = false;
+	break;
+      }
+      if (Color::distance((*iterator).color, c) != 0) {
+	c = (*iterator).color;
+	kmean[i] = c;
+	cout << c << endl;
+	i++;
+      }
+      iterator++;
     }
-    kmean[i] = (*iterator).color;
-    iterator++;
   }
+
+
   
+  cout << "KMEAN BEFORE" << endl;
+  for (int i = 0; i < K; i++) {
+    cout << kmean[i] << endl;
+  }
+
+
+
   if (enoughColors) {
     // Algorithme des k-moyennes //////////////////////////////
-    
-    bool unchanged = false;
+    bool changed = true;
     unsigned int nearest;
     double nearestDist;
     double dist;
     unsigned long clusterWeight[K];
-    unsigned long m;
+    unsigned long weight;
     Triplet nextKMean[K];
 
-    while(!unchanged) {
+    while(changed) {
+
+      cout << "KMEAN AFTER" << endl;
+      for (int i = 0; i < K; i++) {
+	cout << kmean[i] << endl;
+      }
 
       for (int i = 0 ; i < K ; i++ ) {
 	nextKMean[i] = Triplet(0,0,0);
 	clusterWeight[i] = 0;
       }
-    
-      cout << "Initialisation des nextKMean" << endl;
-
+ 
       // Mettre à jour les clusters
       for (list<point>::iterator iterator = pointList.begin() ; 
 	   iterator != pointList.end() ; iterator++) {
@@ -141,6 +131,7 @@ int main(int argc, char* argv[]) {
 	nearestDist = 4096; // sqrt(256*256*256)
 	// Calculer la moyenne la plus proche
 	for (int i = 0 ; i < K ; i++ ) {
+	  
 	  dist = Color::distance(c, kmean[i]);
 	  if (dist < nearestDist) {
 	    nearestDist = dist;
@@ -151,10 +142,10 @@ int main(int argc, char* argv[]) {
 	(*iterator).cluster = nearest;
 
 	// Calculer les prochaines moyennes
-	m = ch.getColor(c);
+	weight = ch.getColor(c);
 
-	nextKMean[nearest].addMultiply(c, m);
-	clusterWeight[nearest] += m;
+	nextKMean[nearest].addMultiply(c, weight);
+	clusterWeight[nearest] += weight;
 
       }
 
@@ -179,51 +170,39 @@ int main(int argc, char* argv[]) {
       // Diviser les moyennes par leur poids.  Mettre à jour les
       // moyennes et vérifier si elles ont changé.
       
-      unchanged = true;
+      changed = false;
       for (int i = 0 ; i < K ; i++ ) {
 	nextKMean[i].divide(clusterWeight[i]);
-	
 	c = nextKMean[i].getColor();
-	unchanged = unchanged &&
-	  (c.getR() == kmean[i].getR()) &&
-	  (c.getG() == kmean[i].getG()) &&
-	  (c.getB() == kmean[i].getB());
+	cout << kmean[i] << " puis " << c << endl;
+	changed = changed or
+	  (c.getR() != kmean[i].getR()) or
+	  (c.getG() != kmean[i].getG()) or
+	  (c.getB() != kmean[i].getB());
+	
+	kmean[i] = c;
       }
     
-    // Afficher les moyennes
-    for (int i = 0 ; i < K ; i++ ) {
-      c = kmean[i];
-      for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
-	for (int k = 0 ; k < image.width() ; k++) {
-	  visu(j, k, 0) = c.getR();
-	  visu(j, k, 1) = c.getG();
-	  visu(j, k, 2) = c.getB();
+      // Afficher les moyennes
+      for (int i = 0 ; i < K ; i++ ) {
+	c = kmean[i];
+	for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
+	  for (int k = 0 ; k < image.width() ; k++) {
+	    visu(k, j, 0) = c.getR();
+	    visu(k, j, 1) = c.getG();
+	    visu(k, j, 2) = c.getB();
+	  }
 	}
       }
-    }
-
-    }
-    
-
-
-    // Afficher les moyennes
-    for (int i = 0 ; i < K ; i++ ) {
-      c = kmean[i];
-      for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
-	for (int k = 0 ; k < image.width() ; k++) {
-	  visu(j, k, 0) = c.getR();
-	  visu(j, k, 1) = c.getG();
-	  visu(j, k, 2) = c.getB();
-	}
-      }
-    }
-    
-    visu.display(visu_disp);
-    while(!orig_disp.is_closed() && !visu_disp.is_closed()) {
-      orig_disp.wait();
+      visu.display(visu_disp);
       
+      cin.ignore();
     }
+    
+    cout << "Fin de l'algorithme" << endl;
+    visu.display(visu_disp);
 
+    cin.ignore();
 
   } else {
     cout << "L'image originale contient moins de couleur que le nombre demandé." << endl;
