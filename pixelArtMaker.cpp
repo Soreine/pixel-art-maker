@@ -70,39 +70,23 @@ int main(int argc, char* argv[]) {
   
   ////////////////// K-Mean ////////////////////////
 
-
-
-  // Initialiser les clusters avec des couleurs de l'image.
-  list<point>::iterator iterator = pointList.begin();
-  bool enoughColors = true;
-  kmean[0] = c = (*iterator).color;
-  for (int i = 1; i < K;) {
-    if (iterator == pointList.end()) {
-      enoughColors = false;
-      break;
-    }
-    if (Color::distance((*iterator).color, c) != 0) {
-      c = (*iterator).color;
-      
-      kmean[i] = c;
-      //cout << c << endl;
-      i++;
-    }
-    iterator++;
-  }
-
-  
-  //cout << "KMEAN BEFORE" << endl;
-  for (int i = 0; i < K; i++) {
-    //cout << kmean[i] << endl;
-  }
-  
-  
-
-  if (not enoughColors) {
+  if (pointList.size() < (unsigned int) K) { // Pas assez de couleurs
     cerr << "L'image originale contient moins de couleur que le nombre demandé." << endl;
     exit(1);
   }
+
+  // Initialiser les clusters avec des couleurs de l'image.
+  list<point>::iterator iterator = pointList.begin();
+  
+  unsigned int step = pointList.size()/(unsigned int) K;
+
+  for (int i = 0; i < K; i++) {
+      c = (*iterator).color;
+      kmean[i] = c;
+
+      std::advance(iterator, step);
+  }
+
   
   // Algorithme des k-moyennes //////////////////////////////
     
