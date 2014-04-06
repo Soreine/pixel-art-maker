@@ -4,14 +4,20 @@ SOURCES = pixelArtMaker.cpp \
 	  lib/Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
+
 TARGET = pixelArtMaker
 
-OPTIONS = -I.. -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include  -lm -L/usr/X11R6/lib -lpthread -lX11 
+
+
+CPPFLAGS = -g -Wall -W -ansi -pedantic -Dcimg_use_vt100 -I/usr/X11R6/include
+
+LDFLAGS =  -L/usr/X11R6/lib -lpthread -lX11 -lm
 
 all: $(OBJECTS)
-	g++  -g -o $(TARGET) $(OBJECTS) $(OPTIONS)
+	g++ -o $(TARGET) $(OBJECTS) $(LDFLAGS)
+
 %o: %cpp
-	g++ -std=c++11 -g -o  $@ -c $< 
+	g++ $(CPPFLAGS) -c -o $@ $< 
 
 clean:
 	rm -rf $(OBJECTS)

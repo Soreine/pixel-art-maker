@@ -31,5 +31,5 @@ void Triplet::divide(long d) {
 }
 
 Color Triplet::getColor() const {
-
+  return Color(values[0], values[1], values[2]);
 }
