@@ -12,6 +12,8 @@ class Color {
   unsigned char getR() const;
   unsigned char getG() const;
   unsigned char getB() const;
+
+  Color mix(Color const& c, float amount);
   
   static double distance(Color const& c1, Color const& c2);
 

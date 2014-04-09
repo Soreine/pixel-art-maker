@@ -41,7 +41,7 @@ double Color::distance(Color const& c1, Color const& c2){
   long g = (long) c1.getG() - (long) c2.getG();
   long b = (long) c1.getB() - (long) c2.getB();
 
-  return sqrt((((512 + rmean)*r*r)>>8) + 4<<g*g + (((767-rmean)*b*b)>>8));
+  return sqrt((((512 + rmean)*r*r)>>8) + (4<<g*g) + (((767-rmean)*b*b)>>8));
   */
 
   long r = (long) c1.getR() - (long) c2.getR();
@@ -53,6 +53,18 @@ double Color::distance(Color const& c1, Color const& c2){
 }
 
 
+Color Color::mix(Color const& c, float amount){
+  /* 
+     assert(amount <= 1);
+     assert(amount >= 0);
+  */
+
+  Color result(round(c.getR()*amount + this->r*(1-amount)),
+	       round(c.getG()*amount + this->g*(1-amount)),
+	       round(c.getB()*amount + this->b*(1-amount)));
+  return result;
+}
+  
 std::ostream& operator<<(std::ostream &strm, const Color &c) {
   return strm << "Color(" << (int) c.getR() << "," << (int) c.getG() << "," <<  (int) c.getB() << ")";
 }
