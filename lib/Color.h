@@ -16,6 +16,7 @@ class Color {
   Color mix(Color const& c, float amount);
   
   static double distance(Color const& c1, Color const& c2);
+  static double colorCompare(Color const& c1, Color const& c2);
 
  private :
   unsigned char r;

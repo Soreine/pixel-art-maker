@@ -41,7 +41,7 @@ void reconstruct_basic(CImg<unsigned char> image, Color * palette, int size) {
       nearestDist = 4096; // sqrt(256*256*256)
       // Calculer la moyenne la plus proche
       for (int k = 0 ; k < size ; k++ ) {
-	dist = Color::distance(c, palette[k]);
+	dist = Color::colorCompare(c, palette[k]);
 	if (dist < nearestDist) {
 	  nearestDist = dist;
 	  nearest = k;
@@ -100,7 +100,7 @@ void reconstruct_alternate(CImg<unsigned char> image, Color * palette, int size)
       nearestDist = 4096; // sqrt(256*256*256)
       // Compute the closest color within the original palette
       for (int k = 0 ; k < size ; k++ ) {
-	dist = Color::distance(c, palette[k]);
+	dist = Color::colorCompare(c, palette[k]);
 	if (dist < nearestDist) {
 	  nearestDist = dist;
 	  nearest = k;
@@ -109,7 +109,7 @@ void reconstruct_alternate(CImg<unsigned char> image, Color * palette, int size)
 
       // Check if a mixed color is closer 
       for (int k = 0 ; k < nbMixed ; k++) {
-	dist = Color::distance(c, extendedPalette[k].color);
+	dist = Color::colorCompare(c, extendedPalette[k].color);
 	if (dist < nearestDist) {
 	  nearestDist = dist;
 	  isMixed = true;
@@ -176,7 +176,7 @@ void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
       nearestDist = 4096; // sqrt(256*256*256)
       // Compute the closest color within the original palette
       for (int k = 0 ; k < size ; k++ ) {
-	dist = Color::distance(c, palette[k]);
+	dist = Color::colorCompare(c, palette[k]);
 	if (dist < nearestDist) {
 	  nearestDist = dist;
 	  nearest = k;
@@ -185,7 +185,7 @@ void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
 
       // Check if a mixed color is closer 
       for (int k = 0 ; k < nbMixed ; k++) {
-	dist = Color::distance(c, extendedPalette[k].color);
+	dist = Color::colorCompare(c, extendedPalette[k].color);
 	if (dist < nearestDist) {
 	  nearestDist = dist;
 	  isMixed = true;
@@ -303,14 +303,14 @@ int main(int argc, char* argv[]) {
       clusterWeight[i] = 0;
     }
       
-    // Mettre à jour les clusters
+    // Update the clusters
     for (list<point>::iterator iterator = pointList.begin() ; 
 	 iterator != pointList.end() ; iterator++) {
       c = (*iterator).color;
 	
       nearest = 0;
       nearestDist = 4096; // sqrt(256*256*256)
-      // Calculer la moyenne la plus proche
+      // Find the closest mean
       for (int i = 0 ; i < K ; i++ ) {
 	  
 	dist = Color::distance(c, kmean[i]);
@@ -322,7 +322,7 @@ int main(int argc, char* argv[]) {
 	
       (*iterator).cluster = nearest;
 	
-      // Calculer les prochaines moyennes
+      // Recompute the means
       weight = ch.getColor(c);
 	
       nextKMean[nearest].addMultiply(c, weight);
@@ -333,23 +333,8 @@ int main(int argc, char* argv[]) {
     //cout << "Toutes les couleurs traitées" << endl;
       
       
-    /*
-      for (list<point>::iterator iterator = pointList.begin() ; 
-      iterator != pointList.end() ; iterator++) {
-	
-      // Mettre à jour les moyennes    
-	
-      c = (*iterator).color;
-      m = ch.getColor(c);
-	
-      nextKMean[(*iterator).cluster].addMultiply(c, m);
-      clusterWeight[(*iterator).cluster] += m;
-      }
-    */
-      
-      
-    // Diviser les moyennes par leur poids.  Mettre à jour les
-    // moyennes et vérifier si elles ont changé.
+    // Divide the means by their weight. Update the means and check
+    // whether they have changed.
       
     changed = false;
     for (int i = 0 ; i < K ; i++ ) {
@@ -365,7 +350,7 @@ int main(int argc, char* argv[]) {
       kmean[i] = c;
     }
       
-    // Afficher les moyennes
+    // Plot the means
     for (int i = 0 ; i < K ; i++ ) {
       c = kmean[i];
       for (int j = i*(image.height()/K); j < (i+1)*(image.height()/K) ; j++) {
@@ -385,11 +370,13 @@ int main(int argc, char* argv[]) {
   cout << endl << "Done. Hit Enter to begin reconstruction" << endl;
   cin.ignore();
   
+  // Begin reconstructions of the original picture.
+
   reconstruct_basic(image, kmean, K);
 
-  reconstruct_alternate(image, kmean, K);
+  // reconstruct_alternate(image, kmean, K);
 
-  reconstruct_bayer(image, kmean, K);
+  // reconstruct_bayer(image, kmean, K);
 
   delete[] nextKMean; // Attention, permet les dépassement de tableau
   delete[] kmean;
