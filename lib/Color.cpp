@@ -1,4 +1,5 @@
 #include "Color.h"
+#include "Triplet.h"
 #include <math.h>
 #include <ostream>
 
@@ -18,6 +19,7 @@ unsigned char Color::getG() const {
 unsigned char Color::getB() const {
   return this->b;
 }
+
 
 double Color::distance(Color const& c1, Color const& c2){
   /*
@@ -44,12 +46,15 @@ double Color::distance(Color const& c1, Color const& c2){
   return sqrt((((512 + rmean)*r*r)>>8) + (4<<g*g) + (((767-rmean)*b*b)>>8));
   */
 
+  return sqrt(distance2(c1, c2));
+
+}
+
+double Color::distance2(Color const& c1, Color const& c2){
   long r = (long) c1.getR() - (long) c2.getR();
   long g = (long) c1.getG() - (long) c2.getG();
   long b = (long) c1.getB() - (long) c2.getB();
-
-  return sqrt(r*r + g*g + b*b);
-
+  return (r*r + g*g + b*b);
 }
 
 double Color::colorCompare(Color const& c1, Color const& c2)
@@ -69,18 +74,32 @@ double Color::colorCompare(Color const& c1, Color const& c2)
 }
 
 
-Color Color::mix(Color const& c, float amount){
+Color Color::mix(Color const& c1, Color const& c2, float amount){
   /* 
      assert(amount <= 1);
      assert(amount >= 0);
   */
 
-  Color result(round(c.getR()*amount + this->r*(1-amount)),
-	       round(c.getG()*amount + this->g*(1-amount)),
-	       round(c.getB()*amount + this->b*(1-amount)));
+  Color result(round(c1.getR()*amount + c2.getR()*(1-amount)),
+	       round(c1.getG()*amount + c2.getG()*(1-amount)),
+	       round(c1.getB()*amount + c2.getB()*(1-amount)));
   return result;
 }
   
+// Multiply the component of this color by the
+void multiply(unsigned int m) {
+  this->r*=m;
+  this->g*=m;
+  this->b*=m;
+}
+
+Triplet toTriplet() {
+  return Triplet(this->r, this->g, this->b);
+}
+
 std::ostream& operator<<(std::ostream &strm, const Color &c) {
-  return strm << "Color(" << (int) c.getR() << "," << (int) c.getG() << "," <<  (int) c.getB() << ")";
+  return strm << "Color(" 
+	      << (int) c.getR() << ","
+	      << (int) c.getG() << "," 
+	      <<  (int) c.getB() << ")";
 }
