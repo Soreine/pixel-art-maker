@@ -86,14 +86,7 @@ Color Color::mix(Color const& c1, Color const& c2, float amount){
   return result;
 }
   
-// Multiply the component of this color by the
-void multiply(unsigned int m) {
-  this->r*=m;
-  this->g*=m;
-  this->b*=m;
-}
-
-Triplet toTriplet() {
+Triplet Color::toTriplet() {
   return Triplet(this->r, this->g, this->b);
 }
 

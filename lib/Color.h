@@ -2,6 +2,7 @@
 #define COLOR_H
 
 #include <ostream>
+#include "Triplet.h"
 
 class Color {
  public :

@@ -19,7 +19,7 @@ class Triplet {
 
   /** Add the R,G,B components of 'c' multiplied by 'm' to the x, y, z
       values of this Triplet */
-  void addMultiply(Color const& c, unsigned int m);
+  void multiply(unsigned int m);
 
   /** Divide all the values by 'd' */
   void divide(long d);

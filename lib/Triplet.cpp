@@ -18,10 +18,10 @@ void Triplet::add(Triplet const& t) {
 }
 
 
-void Triplet::addMultiply(Color const& c, unsigned int m) {
-  values[0] += m*c.getR();
-  values[1] += m*c.getG();
-  values[2] += m*c.getB();
+void Triplet::multiply(unsigned int m) {
+    values[0] *=m;
+    values[1] *=m;
+    values[2] *=m;
 }
 
 void Triplet::divide(long d) {

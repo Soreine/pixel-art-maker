@@ -1,11 +1,11 @@
-SOURCES = pixelArtMaker.cpp \
+SOURCES = generate-palette.cpp \
 	  lib/ColorHist.cpp \
 	  lib/Color.cpp \
 	  lib/Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-TARGET = pixelArtMaker
+TARGET = generate-palette
 
 
 
