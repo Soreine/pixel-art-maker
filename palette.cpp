@@ -14,15 +14,13 @@ using namespace cimg_library;
 
 /** 
     This program determine the best color palette to use to display an
-    image and then try to display this image using the computed
-    palette and a given threshold matrix. 
-    Use : 'ditherer %filepath %colorsCount'
+    image, using the K-mean algorithm.
+    Use : 'palette %filepath %colorsCount'
     Parameters :
     filepath : The path to the image file.
     colorsCount : The desired number of colors in the palette used
     Result :
-    The reconstructed image and an image containing the palette's
-    colors will be saved.
+    An image containing the palette's colors will be saved.
 */
 
 
@@ -41,128 +39,11 @@ inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image
 }
 
 
-void reconstruct_basic(CImg<unsigned char> image, Color * palette, int size) {
-    /////////////// Reconstruction ///////////////////
-    CImg<unsigned char> reconstructed(image.width(), image.height(), 1, 3, 0);
-    CImgDisplay reconstructed_disp(reconstructed, "Image reconstruite");
-    Color c;
-    int nearest;
-    double nearestDist, dist;
-
-    for (int i = 0 ; i < image.width() ; i++) {
-	for (int j = 0 ; j < image.height() ; j++) {
-	    c = getPixel(i, j, image);
-      
-	    nearest = 0;
-	    nearestDist = 4096; // sqrt(256*256*256)
-	    // Calculer la moyenne la plus proche
-	    for (int k = 0 ; k < size ; k++ ) {
-		dist = Color::colorCompare(c, palette[k]);
-		if (dist < nearestDist) {
-		    nearestDist = dist;
-		    nearest = k;
-		}
-	    }
-	    reconstructed(i, j, 0) = palette[nearest].getR();
-	    reconstructed(i, j, 1) = palette[nearest].getG();
-	    reconstructed(i, j, 2) = palette[nearest].getB();
-	}
-    }
-
-
-    reconstructed.display(reconstructed_disp);
-    reconstructed.save("reconstructed-basic.png");
-
-    cin.ignore();
-}
-
-
-struct mix{
-    Color color;
-    Color c1;
-    Color c2;
-};
-
-void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
-  
-    CImg<unsigned char> reconstructed(image.width(), image.height(), 1, 3, 0);
-    CImgDisplay reconstructed_disp(reconstructed, "Image reconstruite");
-    Color c;
-    int nearest, k;
-    double nearestDist, dist;
-    bool isMixed;
-    int nbMixed = size*(size-1)/2;
-    mix * extendedPalette = new mix[nbMixed];
-  
-    // Compute the possible mix of color
-    k = 0;
-    for(int i = 0; i < size; i++) {
-	for(int j = i+1; j < size; j++) {
-	    extendedPalette[k].color = Color::mix(palette[i], palette[j], 0.5); // The half mix between i and j
-	    extendedPalette[k].c1 = palette[i];
-	    extendedPalette[k].c2 = palette[j];
-	    k++;
-	}
-    }
-
-    // Reconstruction
-    for (int i = 0 ; i < image.width() ; i++) {
-	for (int j = 0 ; j < image.height() ; j++) {
-	    c = getPixel(i, j, image);
-
-	    isMixed = false;
-      
-	    nearest = 0;
-	    nearestDist = 4096; // sqrt(256*256*256)
-	    // Compute the closest color within the original palette
-	    for (int k = 0 ; k < size ; k++ ) {
-		dist = Color::colorCompare(c, palette[k]);
-		if (dist < nearestDist) {
-		    nearestDist = dist;
-		    nearest = k;
-		}
-	    }
-
-	    // Check if a mixed color is closer 
-	    for (int k = 0 ; k < nbMixed ; k++) {
-		dist = Color::colorCompare(c, extendedPalette[k].color);
-		if (dist < nearestDist) {
-		    nearestDist = dist;
-		    isMixed = true;
-		    nearest = k;
-		}
-	    }
-      
-	    if (isMixed) {
-		if ((i + j)%2 == 0) {
-		    reconstructed(i, j, 0) = extendedPalette[nearest].c1.getR();
-		    reconstructed(i, j, 1) = extendedPalette[nearest].c1.getG();
-		    reconstructed(i, j, 2) = extendedPalette[nearest].c1.getB();
-		} else {
-		    reconstructed(i, j, 0) = extendedPalette[nearest].c2.getR();
-		    reconstructed(i, j, 1) = extendedPalette[nearest].c2.getG();
-		    reconstructed(i, j, 2) = extendedPalette[nearest].c2.getB();
-		}
-	    } else {
-		reconstructed(i, j, 0) = palette[nearest].getR();
-		reconstructed(i, j, 1) = palette[nearest].getG();
-		reconstructed(i, j, 2) = palette[nearest].getB();
-	    }
-	}
-    }
-
-
-    reconstructed.display(reconstructed_disp);
-    reconstructed.save("reconstructed-bayer.png");
-    cin.ignore();
-}
 
 void generatePalette(char * file, int K) {
 
     // Load the image
     CImg<unsigned char> image(file);
-    // Create the image that will contain the palette colors. 
-    CImg<unsigned char> palette(256, 256, 1, 3, 0);
     // Create a display for the original image
     CImgDisplay orig_disp(image, "Original");
   
@@ -314,6 +195,14 @@ void generatePalette(char * file, int K) {
 
       
     // The algorithm has converged. The kmean represent our colors
+    cout << "algorithm converged " << endl;
+    // Determine the palette image size (at most 256 pixels wide)
+    int height = K/256 + 1;
+    int width = K%256;
+    // Create the image that will contain the palette colors. 
+    CImg<unsigned char> palette(width, height, 1, 3, 0);
+
+    // Sort the palette color TODO
 
     // Generate the palette image
     for (int n = 0 ; n < K ; n++ ) {
@@ -325,31 +214,22 @@ void generatePalette(char * file, int K) {
 	// Column
 	int j = n%palette.width();
 	// Fill the RGB channels
-	palette(i, j, 0) = c.getR();
-	palette(i, j, 1) = c.getG();
-	palette(i, j, 2) = c.getB();
+	palette(j, i, 0) = c.getR();
+	palette(j, i, 1) = c.getG();
+	palette(j, i, 2) = c.getB();
     }
 
-    // Save the image (filename.paletteK.png)
+    cout << "image filled " << endl;
+
+    // Save the image (palette-K-filename)
     stringstream ss;
     ss << K;
-    string string_palette = std::string(file) + "palette" + ss.str() + ".png";
+    string string_palette = "palette-" + ss.str() + "-" + std::string(file);
     const char * char_palette = string_palette.c_str();
     palette.save(char_palette);
-    
-    
 
-    cout << endl << "Done. Hit Enter to begin reconstruction" << endl;
-    cin.ignore();
+    cout << endl << "Palette image saved under " << char_palette << endl;
   
-    // Begin reconstructions of the original picture.
-
-    reconstruct_basic(image, kmean, K);
-
-    // reconstruct_alternate(image, kmean, K);
-
-    // reconstruct_bayer(image, kmean, K);
-
     delete[] nextKMean; // Warning, allows array overhead...
     delete[] kmean;
 }

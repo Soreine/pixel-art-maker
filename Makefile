@@ -1,11 +1,11 @@
-SOURCES = generate-palette.cpp \
+SOURCES = palette.cpp \
 	  lib/ColorHist.cpp \
 	  lib/Color.cpp \
 	  lib/Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
-TARGET = generate-palette
+TARGET = palette
 
 
 
