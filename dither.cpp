@@ -13,16 +13,17 @@ using namespace cimg_library;
 
 
 /** 
-    This program load an image and a palette image then try to display
-    this image using the computed palette and a given threshold
-    matrix.
-    Use : 'ditherer %filepath %colorsCount'
+    This program loads a palette image and an image and then try to
+    display this image using the computed palette and a given
+    threshold matrix.
+    Use : 'dither %paletteFile %thresholdPattern %imageFile (%outputFile)'
     Parameters :
-    filepath : The path to the image file.
-    colorsCount : The desired number of colors in the palette used
+    paletteFile : The path to the palette file.
+    thresholdPattern : The path to an image used as a threshold matrix
+    imageFile : The path to the image file to dither
+    outputFile : The result image will be saved under this name
     Result :
-    The reconstructed image and an image containing the palette's
-    colors will be saved.
+    The reconstructed image will be saved.
 */
 
 
@@ -37,6 +38,8 @@ void reconstruct_basic(CImg<unsigned char> image, Color * palette, int size) {
     Color c;
     int nearest;
     double nearestDist, dist;
+    // The number of colors in the palette.
+    int paletteCount;
 
     for (int i = 0 ; i < image.width() ; i++) {
 	for (int j = 0 ; j < image.height() ; j++) {
@@ -64,13 +67,6 @@ void reconstruct_basic(CImg<unsigned char> image, Color * palette, int size) {
 
     cin.ignore();
 }
-
-
-struct mix{
-    Color color;
-    Color c1;
-    Color c2;
-};
 
 void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
   
@@ -148,32 +144,48 @@ void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
 
 int main(int argc, char* argv[]) {
 
-    // The file path
-    char * file;
-    // The number of colors in the palette. This correspond to the K of
-    // the K-mean algorithm.
-    int K;
+    // The image file path
+    char * fileImage;
+    // The palette image file path
+    char * filePalette;
+    // The threshold pattern image file path
+    char * fileThreshold;
 
     // If not enough arguments were given when called
-    if (argc != 3) {
+    if (argc != 4) {
 	// Display an error and exit
-	cerr << "Expected : " << argv[0] << " %filepath %colorsCount" << endl;
+	cerr << "Expected : " << argv[0] << " %imageFile %paletteFile %thresholdFile" << endl;
 	exit(1);
     }
   
-    // Retrieve the file path argument
-    file = argv[1];
-    // Retrieve the number of colors argument
-    K = atoi(argv[2]);
+    fileImage = argv[1];
+    filePalette = argv[2];
+    fileThreshold = argv[3];
 
-    // Check that K is between 2 and 65536
-    if(K < 2 || K > 65536) {
-	// Error and exit
-	cerr << "Color Count must be in [2;65536]" << endl;
-	exit(1);
+    // The image
+    CImg<unsigned char>  image(fileImage);
+    // The palette image
+    CImg<unsigned char>  palette(filePalette);
+    // The threshold image
+    CImg<unsigned char>  threshold(fileThreshold);
+
+    // The dithered result image
+    CImg<unsigned char>  result(fileThreshold);
+
+    
+    result = dither(image, palette, threshold);
+
+    // Save dithered image
+    if(argc >= 5) {
+	result.save(outputFile);
+    } else {
+	// Create a generic file name
+	string string_output = std::string(filePalette) + "-" 
+	    + std::string(fileThreshold) + "-dithered-" + std::string(fileImage);
+	const char * char_output = string_palette.c_str();
+	result.save(char_output);
+	cout << endl << "Palette image saved under " << char_output << endl;
     }
-
-    generatePalette(file, K);
 
     return 0;
 }

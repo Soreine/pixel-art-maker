@@ -1,6 +1,7 @@
 SOURCES = palette.cpp \
 	  lib/ColorHist.cpp \
 	  lib/Color.cpp \
+	  lib/HSVColor.cpp \
 	  lib/Triplet.cpp
 
 OBJECTS = $(SOURCES:.cpp=.o)

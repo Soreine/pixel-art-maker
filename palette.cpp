@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <stdlib.h>
 using namespace std;
 
 #include "CImg-1.5.7/CImg.h"
@@ -9,18 +10,21 @@ using namespace cimg_library;
 
 #include "lib/ColorHist.h"
 #include "lib/Color.h"
+#include "lib/HSVColor.h"
 #include "lib/Triplet.h"
 
 
 /** 
     This program determine the best color palette to use to display an
     image, using the K-mean algorithm.
-    Use : 'palette %filepath %colorsCount'
+    Use : 'palette %filepath %colorsCount (%outputFile)'
     Parameters :
     filepath : The path to the image file.
     colorsCount : The desired number of colors in the palette used
+    (optional) outputFile : The name for the output palette image file
     Result :
-    An image containing the palette's colors will be saved.
+    An image containing the palette's colors will be saved under the name
+    'palette-colorCount-imagename'.
 */
 
 
@@ -38,12 +42,23 @@ inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
 }
 
+/** Comparison function between two HSVColor, used for quicksort */
+int HSVcompare (const void * a, const void * b)
+{
+    double aValue = ((HSVColor*)a)->getSortValue();
+    double bValue = ((HSVColor*)b)->getSortValue();
+    if( aValue > bValue ) 
+	return 1;
+    else if (aValue < bValue) 
+	return -1;
+    else 
+	return 0;
+}
 
+/** Generate an return an image containing the optimal K-colors
+    palette for the input image. */
+CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K) {
 
-void generatePalette(char * file, int K) {
-
-    // Load the image
-    CImg<unsigned char> image(file);
     // Create a display for the original image
     CImgDisplay orig_disp(image, "Original");
   
@@ -75,12 +90,9 @@ void generatePalette(char * file, int K) {
 
     // The centers of the clusters in the k-mean algorithm. At the end :
     // the computed color palette
-    Color * kmean;
+    Color * kmean = new Color[K];
     // The next computed kmeans. Acts as an intermediate buffer 
     Triplet * nextKMean = new Triplet[K];
-
-    // Initialize the means array
-    kmean = new Color[K];    
 
     // Initialize the color histogram and the point list
 
@@ -202,7 +214,28 @@ void generatePalette(char * file, int K) {
     // Create the image that will contain the palette colors. 
     CImg<unsigned char> palette(width, height, 1, 3, 0);
 
-    // Sort the palette color TODO
+    // Sort the palette color
+    {
+	// Create an HSV palette
+	HSVColor * hsvPalette = new HSVColor[K];
+	// Fill it with the RGB colors from the palette
+	for(int i = 0; i < K; i++) {
+	    hsvPalette[i] = HSVColor(kmean[i]);
+	    cout << hsvPalette[i].hsv.h << endl;
+	}
+	cout << endl;
+	// Quicksort the palette
+	qsort(hsvPalette, K, sizeof(HSVColor), HSVcompare);
+	for(int i = 0; i < K; i++) {
+	    cout << hsvPalette[i].hsv.h << endl;
+	}
+	// Replace the RGB palette with the ordered values
+	for(int i = 0; i < K; i++) {
+	    kmean[i] = hsvPalette[i].toRGBColor();
+	}
+	
+	delete[] hsvPalette;
+    }
 
     // Generate the palette image
     for (int n = 0 ; n < K ; n++ ) {
@@ -221,30 +254,31 @@ void generatePalette(char * file, int K) {
 
     cout << "image filled " << endl;
 
-    // Save the image (palette-K-filename)
-    stringstream ss;
-    ss << K;
-    string string_palette = "palette-" + ss.str() + "-" + std::string(file);
-    const char * char_palette = string_palette.c_str();
-    palette.save(char_palette);
-
-    cout << endl << "Palette image saved under " << char_palette << endl;
-  
+    // Free memory
     delete[] nextKMean; // Warning, allows array overhead...
     delete[] kmean;
+    delete[] clusterWeight;
+
+    return palette;
 }
 
 
 int main(int argc, char* argv[]) {
 
-    // The file path
+    // The image file path
     char * file;
+    // The output destination file path
+    char * outputFile;
+    // The corresponding image
+    CImg<unsigned char> image;
+    // The generated palette image
+    CImg<unsigned char> palette;
     // The number of colors in the palette. This correspond to the K of
     // the K-mean algorithm.
     int K;
 
     // If not enough arguments were given when called
-    if (argc != 3) {
+    if (argc < 3) {
 	// Display an error and exit
 	cerr << "Expected : " << argv[0] << " %filepath %colorsCount" << endl;
 	exit(1);
@@ -254,7 +288,9 @@ int main(int argc, char* argv[]) {
     file = argv[1];
     // Retrieve the number of colors argument
     K = atoi(argv[2]);
-
+    // If was given the output file name
+    if(argc == 4) 
+	outputFile = argv[3];
     // Check that K is between 2 and 65536
     if(K < 2 || K > 65536) {
 	// Error and exit
@@ -262,7 +298,24 @@ int main(int argc, char* argv[]) {
 	exit(1);
     }
 
-    generatePalette(file, K);
+    // Create the image
+    image = CImg<unsigned char>(file);
+    
+    palette = generatePalette(image, K);
+
+
+    // Save the palette image
+    if(argc == 4) {
+	palette.save(outputFile);
+    } else {
+	// Create a generic file name
+	stringstream ss;
+	ss << K;
+	string string_palette = "palette-" + ss.str() + "-" + std::string(file);
+	const char * char_palette = string_palette.c_str();
+	palette.save(char_palette);
+	cout << endl << "Palette image saved under " << char_palette << endl;
+    }
 
     return 0;
 }
