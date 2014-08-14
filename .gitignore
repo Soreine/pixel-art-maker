@@ -1,6 +1,9 @@
+Archive
+*.png
+*.jpg
+
 # CIMg
 CImg-1.5.7/
-
 
 # Emacs #
 #########

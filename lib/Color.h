@@ -27,7 +27,7 @@ class Color {
   static double distance(Color const& c1, Color const& c2);
 
   /** Return the squared euclidian distance between two colors */
-  static double distance2(Color const& c1, Color const& c2);
+  static long distance2(Color const& c1, Color const& c2);
 
   /** Return a more human-eye accurate distance between two colors. */
   static double colorCompare(Color const& c1, Color const& c2);
