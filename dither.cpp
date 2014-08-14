@@ -37,7 +37,7 @@ inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image
 
 /** Return an non dithered image, made with the input palette */
 CImg<unsigned char>  nodither(CImg<unsigned char> image, CImg<unsigned char> palette) {
-
+    /*
     // The number of colors in the palette
     
     // Grab the colors from the palette image
@@ -150,6 +150,8 @@ void reconstruct_bayer(CImg<unsigned char> image, Color * palette, int size) {
     reconstructed.display(reconstructed_disp);
     reconstructed.save("reconstructed-bayer.png");
     cin.ignore();
+    */
+    return CImg<unsigned char>(100, 100, 1, 3, 0);
 }
 
 int main(int argc, char* argv[]) {
@@ -182,7 +184,16 @@ int main(int argc, char* argv[]) {
     // The dithered result image
     CImg<unsigned char>  result(fileThreshold);
 
+    palette.draw_image(0,0,0,0,img,img.get_channel(3),1,255);
+
+    for(int i = 0; i < palette.width(); i++) {
+	for(int j = 0; j < palette.height(); j++) {
+	    cout <<  palette(i, j, 0) << " " << palette(j, i, 1) 
+		 << " " << palette(i, j, 2) << " " << palette(j, i, 3) << endl;
+	}		     
+    }
     
+    /*
     result = nodither(image, palette, threshold);
 
     // Save dithered image
@@ -196,6 +207,6 @@ int main(int argc, char* argv[]) {
 	result.save(char_output);
 	cout << endl << "Palette image saved under " << char_output << endl;
     }
-
+    */
     return 0;
 }
