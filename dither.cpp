@@ -31,7 +31,17 @@ inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
 }
 
-void reconstruct_basic(CImg<unsigned char> image, Color * palette, int size) {
+
+/** Take all the pixels from an image and save their color in a Color
+    list. Return the number of colors found */
+
+/** Return an non dithered image, made with the input palette */
+CImg<unsigned char>  nodither(CImg<unsigned char> image, CImg<unsigned char> palette) {
+
+    // The number of colors in the palette
+    
+    // Grab the colors from the palette image
+    Color * paletteColors = grabColors(palette);
     /////////////// Reconstruction ///////////////////
     CImg<unsigned char> reconstructed(image.width(), image.height(), 1, 3, 0);
     CImgDisplay reconstructed_disp(reconstructed, "Image reconstruite");
@@ -173,7 +183,7 @@ int main(int argc, char* argv[]) {
     CImg<unsigned char>  result(fileThreshold);
 
     
-    result = dither(image, palette, threshold);
+    result = nodither(image, palette, threshold);
 
     // Save dithered image
     if(argc >= 5) {

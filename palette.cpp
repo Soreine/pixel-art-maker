@@ -153,7 +153,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	    // Find the closest kmean
 	    for (int i = 0 ; i < K ; i++ ) {
 		// Distance from the i-th kmean
-		dist = Color::distance(c, kmean[i]);
+		dist = Color::distance2(c, kmean[i]);
 		// If the distance is best
 		if (dist < nearestDist) {
 		    // Update nearest variables
@@ -210,9 +210,11 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     cout << "algorithm converged " << endl;
     // Determine the palette image size (at most 256 pixels wide)
     int height = K/256 + 1;
-    int width = K%256;
-    // Create the image that will contain the palette colors. 
-    CImg<unsigned char> palette(width, height, 1, 3, 0);
+    int width = K<255?K:256; // minimum between K and 256
+
+    // Create the image that will contain the palette colors, the
+    // fourth channel is for transparency
+    CImg<unsigned char> palette(width, height, 1, 4, 0);
 
     // Sort the palette color
     {
@@ -221,14 +223,10 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	// Fill it with the RGB colors from the palette
 	for(int i = 0; i < K; i++) {
 	    hsvPalette[i] = HSVColor(kmean[i]);
-	    cout << hsvPalette[i].hsv.h << endl;
 	}
-	cout << endl;
 	// Quicksort the palette
 	qsort(hsvPalette, K, sizeof(HSVColor), HSVcompare);
-	for(int i = 0; i < K; i++) {
-	    cout << hsvPalette[i].hsv.h << endl;
-	}
+
 	// Replace the RGB palette with the ordered values
 	for(int i = 0; i < K; i++) {
 	    kmean[i] = hsvPalette[i].toRGBColor();
@@ -250,15 +248,19 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	palette(j, i, 0) = c.getR();
 	palette(j, i, 1) = c.getG();
 	palette(j, i, 2) = c.getB();
+	palette(j, i, 3) = 255; // Opacity 100%
     }
 
     cout << "image filled " << endl;
 
     // Free memory
-    delete[] nextKMean; // Warning, allows array overhead...
+    cout << "Free nextKmean " << endl;
+    delete[] nextKMean;
+    cout << "Free kmean" << endl;
     delete[] kmean;
+    cout << "Free cluster weight " << endl;
     delete[] clusterWeight;
-
+    cout << "Freed" << endl;
     return palette;
 }
 
@@ -306,13 +308,15 @@ int main(int argc, char* argv[]) {
 
     // Save the palette image
     if(argc == 4) {
+	cout << "Saving..." << endl;
 	palette.save(outputFile);
     } else {
 	// Create a generic file name
 	stringstream ss;
 	ss << K;
-	string string_palette = "palette-" + ss.str() + "-" + std::string(file);
+	string string_palette = "palette-" + ss.str() + "-" + std::string(file) + ".png";
 	const char * char_palette = string_palette.c_str();
+	cout << "Saving..." << endl;
 	palette.save(char_palette);
 	cout << endl << "Palette image saved under " << char_palette << endl;
     }

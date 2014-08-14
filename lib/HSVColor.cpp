@@ -1,13 +1,14 @@
 #include "HSVColor.h"
+#include <iostream>
 
 /** Implementation taken from
     http://stackoverflow.com/questions/3018313/algorithm-to-convert-rgb-to-hsv-and-hsv-to-rgb-in-range-0-255-for-both
  */
 
 typedef struct {
-    double r;       // percent
-    double g;       // percent
-    double b;       // percent
+    double r;       // 256
+    double g;       // 256
+    double b;       // 256
 } rgb;
 
 hsvComponents rgb2hsv(rgb in)
