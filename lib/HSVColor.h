@@ -22,9 +22,6 @@ class HSVColor {
     /** Create an HSVColor from the input Color */
     HSVColor(Color const& c);
 
-    /** Return the value of this HSV Color, used for sorting */
-    double getSortValue() const;
-    
     /** Return this HSVColor as an RGB Color */
     Color toRGBColor() const;
 };

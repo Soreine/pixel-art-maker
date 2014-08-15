@@ -9,6 +9,7 @@ using namespace cimg_library;
 
 #include "lib/ColorHist.h"
 #include "lib/Color.h"
+#include "lib/HSVColor.h"
 #include "lib/Triplet.h"
 
 
@@ -38,6 +39,33 @@ double bayer8x8(int p) {
 
 inline Color getColor(int const x, int const y, CImg<unsigned char> const& image) {
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
+}
+
+/** Comparison function between two HSVColor, used to order
+    colors. Sort by value, then saturation, then hue */
+int HSVcompare (HSVColor const& a, HSVColor const& b) {
+    // Sort by value
+    if( a.hsv.v > b.hsv.v ) {
+	return 1;
+    } else if (a.hsv.v < b.hsv.v) {
+	return -1;
+    } else {
+	// Sort by saturation
+	if( a.hsv.s > b.hsv.s ) {
+	    return 1;
+	} else if ( a.hsv.s > b.hsv.s) {
+	    return -1;
+	} else {
+	    // Sort by hue
+	    if( a.hsv.h > b.hsv.h ) {
+		return 1;
+	    } else if ( a.hsv.h > b.hsv.h) {
+		return -1;
+	    } else {
+		return 0;
+	    }
+	}
+    }
 }
 
 /** Parse a palette image and fill the palette Color array with all
@@ -139,7 +167,7 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
 
     // The palette colors array
     Color * palette;
-    // The number of colors in the palette
+      // The number of colors in the palette
     int colorCount;
     
     // Grab the colors from the palette and set the colorCount
@@ -198,6 +226,8 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
     long dist;
     // The palette colors array
     Color * palette;
+    // The palette colors array as HSVColors
+    HSVColor * paletteHSV;
     // The number of colors in the palette
     int colorCount;
     
@@ -216,6 +246,12 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
     // Grab the colors from the palette and set the colorCount
     parsePalette(paletteImage, palette, colorCount);
 
+    // Initialize the paletteHSV
+    paletteHSV = new HSVColor[colorCount];
+    // Fill it
+    for(int k = 0; k < colorCount; k++) {
+	paletteHSV[k] = HSVColor(palette[k]);
+    }
     // For each pixel in the image, find the best two colors
     for (int y = 0 ; y < image.height() ; y++) {
 	for (int x = 0 ; x < image.width() ; x++) {
@@ -252,6 +288,18 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
 
 	    // The corresponding threshold value
 	    double thresholdValue = threshold[(x % tWidth) + tWidth*(y % tHeight)];
+	    // Reorder the two colors if needed (for continuity when
+	    // going closer from the second one)
+	    if(HSVcompare(paletteHSV[nearest1], paletteHSV[nearest2]) > 0) {
+		// Swap the two
+		nearest1 = nearest1 ^ nearest2;
+		nearest2 = nearest1 ^ nearest2;
+		nearest1 = nearest1 ^ nearest2;
+		
+		nearestDist1 = nearestDist1 ^ nearestDist2;
+		nearestDist2 = nearestDist1 ^ nearestDist2;
+		nearestDist1 = nearestDist1 ^ nearestDist2;
+	    }
 	    // Our color is located between two colors :
 	    double value = (double) nearestDist1 / (double) (nearestDist1 + nearestDist2);
 	    // Pick one of the two best color, regarding to the threshold map

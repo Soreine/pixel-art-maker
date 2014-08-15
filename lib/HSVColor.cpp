@@ -124,13 +124,6 @@ HSVColor::HSVColor(Color const& c) {
     this->hsv = rgb2hsv(rgb);
 }
 
-/** Return the value of this HSV Color, used for sorting */
-double HSVColor::getSortValue() const {
-    // 5*V + 2*S + H  with HSV as percentages
-    //return this->hsv.v * 5 + this->hsv.s * 2 + this->hsv.h/3.6;
-    return this->hsv.h;
-}
-
 /** Return this HSVColor as an RGB Color */
 Color HSVColor::toRGBColor() const {
     rgb rgb = hsv2rgb(this->hsv);

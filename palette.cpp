@@ -45,8 +45,9 @@ inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image
 /** Comparison function between two HSVColor, used for quicksort */
 int HSVcompare (const void * a, const void * b)
 {
-    double aValue = ((HSVColor*)a)->getSortValue();
-    double bValue = ((HSVColor*)b)->getSortValue();
+    // Sort by hue
+    double aValue = ((HSVColor*)a)->hsv.h;
+    double bValue = ((HSVColor*)b)->hsv.h;
     if( aValue > bValue ) 
 	return 1;
     else if (aValue < bValue) 
