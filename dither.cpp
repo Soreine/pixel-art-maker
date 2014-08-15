@@ -47,8 +47,8 @@ CImg<unsigned char>  nodither(CImg<unsigned char> image, Color * palette, int co
     long dist;
 
     // For each pixel in the image, find the best color
-    for (int x = 0 ; x < image.width() ; x++) {
-	for (int y = 0 ; y < image.height() ; y++) {
+    for (int y = 0 ; y < image.height() ; y++) {
+	for (int x = 0 ; x < image.width() ; x++) {
 	    // The color to approximate
 	    c = getColor(x, y, image);
 	    // The current nearest color is the first...
@@ -74,6 +74,14 @@ CImg<unsigned char>  nodither(CImg<unsigned char> image, Color * palette, int co
     return reconstructed;
 }
 
+
+float bayerFunction(int p) {
+    int q = p ^ (p >> 3);
+    long result = (((p & 4) >> 2) | ((q & 4) >> 1)
+		   | ((p & 2) << 1) | ((q & 2) << 2)
+		   | ((p & 1) << 4) | ((q & 1) << 5));
+    return (float) result / 64;
+}
 
 int main(int argc, char* argv[]) {
 
@@ -110,6 +118,8 @@ int main(int argc, char* argv[]) {
     // The number of colors in the palette
     int colorCount = 0;
 
+    // 
+
     // Parse the palette image and grab all the colors !
     for(int y = 0; y < paletteImage.height(); y++) {
 	for(int x = 0; x < paletteImage.width(); x++) {
@@ -123,12 +133,13 @@ int main(int argc, char* argv[]) {
 	}		     
     }
 
+    // Parse the threshold image
+
     cout << "Color count : " << colorCount << endl;
     result = nodither(image, palette, colorCount);
 
     // Display the result
-    CImgDisplay orig_disp(result, "Result");    
-
+    CImgDisplay result_disp(result, "Result");    
 
     cout << "Enter to finish" << endl;
     cin.ignore();

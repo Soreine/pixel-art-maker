@@ -96,10 +96,10 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 
     // Initialize the color histogram and the point list
 
-    for (int i = 0 ; i < image.height() ; i++) {
-	for (int j = 0 ; j < image.width() ; j++) { // For each pixel
+    for (int y = 0 ; y < image.height() ; y++) {
+	for (int x = 0 ; x < image.width() ; x++) { // For each pixel
 	    // 
-	    p.color = getPixel(j, i, image);
+	    p.color = getPixel(x, y, image);
 	    p.cluster = 0; 
 	    // Add the color to the histogram
 	    if (!ch.addColor(p.color))
@@ -241,14 +241,14 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	c = kmean[n];
 	// Create a pixel of the color c in the palette image
 	// Line
-	int i = n/palette.width();
+	int y = n/palette.width();
 	// Column
-	int j = n%palette.width();
+	int x = n%palette.width();
 	// Fill the RGB channels
-	palette(j, i, 0) = c.getR();
-	palette(j, i, 1) = c.getG();
-	palette(j, i, 2) = c.getB();
-	palette(j, i, 3) = 255; // Opacity 100%
+	palette(x, y, 0) = c.getR();
+	palette(x, y, 1) = c.getG();
+	palette(x, y, 2) = c.getB();
+	palette(x, y, 3) = 255; // Opacity 100%
     }
 
     cout << "image filled " << endl;
