@@ -114,17 +114,23 @@ int main(int argc, char* argv[]) {
     for(int y = 0; y < paletteImage.height(); y++) {
 	for(int x = 0; x < paletteImage.width(); x++) {
 	    // If not transparent
-	    if(paletteImage(x, y, 3) > 0) {
+	    if(paletteImage(x, y, 3) == 255) {
 		// Add the color
-		getColor(x, y, paletteImage);
+		palette[colorCount] = getColor(x, y, paletteImage);
+		// That's one more color :)
 		colorCount++;
 	    }
 	}		     
     }
 
+    cout << "Color count : " << colorCount << endl;
     result = nodither(image, palette, colorCount);
-    
-    result.display("no dither");
+
+    // Display the result
+    CImgDisplay orig_disp(result, "Result");    
+
+
+    cout << "Enter to finish" << endl;
     cin.ignore();
 
     /*
@@ -140,5 +146,8 @@ int main(int argc, char* argv[]) {
 	cout << endl << "Palette image saved under " << char_output << endl;
     }
     */
+
+    // Free the arrays
+    delete[] palette;
     return 0;
 }
