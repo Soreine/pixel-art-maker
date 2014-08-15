@@ -2,6 +2,9 @@ Archive
 *.png
 *.jpg
 
+palette
+dither
+
 # CIMg
 CImg-1.5.7/
 

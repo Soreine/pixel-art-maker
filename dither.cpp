@@ -104,6 +104,8 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image, CImg<unsigned ch
 	}
     }
 
+    delete[] palette;
+
     // Return the result
     return reconstructed;
 }
@@ -234,7 +236,5 @@ int main(int argc, char* argv[]) {
     }
     */
 
-    // Free the arrays
-    delete[] palette;
     return 0;
 }
