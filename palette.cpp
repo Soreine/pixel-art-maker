@@ -205,10 +205,9 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	cout << ".";
 	cout.flush();
     }
-
-      
     // The algorithm has converged. The kmean represent our colors
-    cout << "algorithm converged " << endl;
+    cout << endl;
+
     // Determine the palette image size (at most 256 pixels wide)
     int height = K/256 + 1;
     int width = K<255?K:256; // minimum between K and 256
@@ -252,16 +251,10 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	palette(x, y, 3) = 255; // Opacity 100%
     }
 
-    cout << "image filled " << endl;
-
     // Free memory
-    cout << "Free nextKmean " << endl;
     delete[] nextKMean;
-    cout << "Free kmean" << endl;
     delete[] kmean;
-    cout << "Free cluster weight " << endl;
     delete[] clusterWeight;
-    cout << "Freed" << endl;
     return palette;
 }
 
@@ -309,8 +302,8 @@ int main(int argc, char* argv[]) {
 
     // Save the palette image
     if(argc == 4) {
-	cout << "Saving..." << endl;
 	palette.save(outputFile);
+	cout << "Saved to " << outputFile << endl;
     } else {
 	// Create a generic file name
 	stringstream ss;

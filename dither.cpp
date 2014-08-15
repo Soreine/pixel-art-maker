@@ -78,12 +78,12 @@ void parsePalette(CImg<unsigned char> const& paletteImage,
 
     // Init the color array
     palette = new Color[paletteImage.height()*paletteImage.width()];
-
+    cout << paletteImage.height()*paletteImage.width() << endl;
     // Parse the palette image and grab all the colors !
     for(int y = 0; y < paletteImage.height(); y++) {
 	for(int x = 0; x < paletteImage.width(); x++) {
 	    // If not transparent
-	    if(paletteImage(x, y, 3) == 255) {
+	    if(paletteImage(x, y, 3) > 0) {
 		// Add the color
 		palette[colorCount] = getColor(x, y, paletteImage);
 		// That's one more color :)
@@ -427,7 +427,7 @@ int main(int argc, char* argv[]) {
     char * fileThreshold;
 
     // If not enough arguments were given when called
-    if (argc != 4) {
+    if (argc != 4 && argc != 5) {
 	// Display an error and exit
 	cerr << "Expected : " << argv[0] << " %imageFile %paletteFile %thresholdFile" << endl;
 	exit(1);
@@ -436,7 +436,7 @@ int main(int argc, char* argv[]) {
     fileImage = argv[1];
     filePalette = argv[2];
     fileThreshold = argv[3];
-
+    
     // The image
     CImg<unsigned char>  image(fileImage);
     // The palette image
@@ -469,5 +469,7 @@ int main(int argc, char* argv[]) {
     }
     */
 
+    if(argc == 5)
+	result.save(argv[4]);
     return 0;
 }
