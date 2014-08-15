@@ -31,9 +31,35 @@ inline Color getColor(int const x, int const y, CImg<unsigned char> const& image
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
 }
 
+/** Parse a palette image and return a pointer to the Color array
+    containing all the colors. Assign the number of colors to the colorCount parameter. */
+Color * parsePalette(CImg<unsigned char> const& paletteImage, int& colorCount) {
+    // Initialize the number of colors
+    colorCount = 0;
+
+    // Init the color array
+    Color * palette = new Color[paletteImage.height()*paletteImage.width()];
+
+    // Parse the palette image and grab all the colors !
+    for(int y = 0; y < paletteImage.height(); y++) {
+	for(int x = 0; x < paletteImage.width(); x++) {
+	    // If not transparent
+	    if(paletteImage(x, y, 3) == 255) {
+		// Add the color
+		palette[colorCount] = getColor(x, y, paletteImage);
+		// That's one more color :)
+		colorCount++;
+	    }
+	}		     
+    }
+
+    cout << "Color count : " << colorCount << endl;
+
+    return palette;    
+}
 
 /** Return an non dithered image, made with the input palette */
-CImg<unsigned char>  nodither(CImg<unsigned char> image, Color * palette, int colorCount) {
+CImg<unsigned char>  nodither(CImg<unsigned char> const& image, CImg<unsigned char> const& paletteImage) {
     // The resulting image, reconstructed from the original with the palette's colors
     CImg<unsigned char> reconstructed(image.width(), image.height(), 1, 3, 0);
 
@@ -45,6 +71,14 @@ CImg<unsigned char>  nodither(CImg<unsigned char> image, Color * palette, int co
     long nearestDist;
     // Distance between two colors
     long dist;
+
+    // The palette colors array
+    Color * palette;
+    // The number of colors in the palette
+    int colorCount;
+    
+    // Grab the colors from the palette and set the colorCount
+    palette = parsePalette(paletteImage, colorCount);
 
     // For each pixel in the image, find the best color
     for (int y = 0 ; y < image.height() ; y++) {
@@ -72,6 +106,71 @@ CImg<unsigned char>  nodither(CImg<unsigned char> image, Color * palette, int co
 
     // Return the result
     return reconstructed;
+}
+
+
+/** Return a dithered image, from the paletteImage colors and using
+    the thresholdImage threshold */
+CImg<unsigned char> dither(CImg<unsigned char> const& image, CImg<unsigned char> const& paletteImage, CImg<unsigned char> const& thresholdImage) {
+    // The resulting image, reconstructed from the original with the palette's colors
+    CImg<unsigned char> dithered(image.width(), image.height(), 1, 3, 0);
+
+    // Temporary color variable
+    Color c;
+    // The nearest color index
+    int nearest;
+    // Distance of the nearest color
+    long nearestDist;
+    // Distance between two colors
+    long dist;
+
+    // The palette colors array
+    Color * palette;
+    // The number of colors in the palette
+    int colorCount;
+    
+    // The threshold map (values between 0 and 1)
+    float * threshold;
+   // The width and height of the threshold map
+    int threshW;
+    int threshH;
+    
+    threshold = new float[threshW*threshH];;
+    // The width and height of the threshold map
+    threshW = thresholdImage.width();
+    threshH = thresholdImage.height();
+
+
+
+    // Grab the colors from the palette and set the colorCount
+    palette = parsePalette(paletteImage, colorCount);
+
+    // For each pixel in the image, find the best color
+    for (int y = 0 ; y < image.height() ; y++) {
+	for (int x = 0 ; x < image.width() ; x++) {
+	    // The color to approximate
+	    c = getColor(x, y, image);
+	    // The current nearest color is the first...
+	    nearest = 0;
+	    nearestDist = 16777216; // (256*256*256) = maximum value
+				    // of distance2(color1, color2)
+	    // Find the closest color in the palette
+	    for (int k = 0 ; k < colorCount ; k++ ) {
+		dist = Color::distance2(c, palette[k]);
+		if (dist < nearestDist) {
+		    nearestDist = dist;
+		    nearest = k;
+		}
+	    }
+	    // Set the target pixel with this color
+	    dithered(x, y, 0) = palette[nearest].getR();
+	    dithered(x, y, 1) = palette[nearest].getG();
+	    dithered(x, y, 2) = palette[nearest].getB();
+	}
+    }
+
+    // Return the result
+    return dithered;
 }
 
 
@@ -108,35 +207,12 @@ int main(int argc, char* argv[]) {
     // The palette image
     CImg<unsigned char>  paletteImage(filePalette);
     // The threshold image
-    CImg<unsigned char>  threshold(fileThreshold);
+    CImg<unsigned char>  thresholdImage(fileThreshold);
 
     // The dithered result image
     CImg<unsigned char>  result(fileThreshold);
 
-    // The palette colors array
-    Color * palette = new Color[paletteImage.height()*paletteImage.width()];
-    // The number of colors in the palette
-    int colorCount = 0;
-
-    // 
-
-    // Parse the palette image and grab all the colors !
-    for(int y = 0; y < paletteImage.height(); y++) {
-	for(int x = 0; x < paletteImage.width(); x++) {
-	    // If not transparent
-	    if(paletteImage(x, y, 3) == 255) {
-		// Add the color
-		palette[colorCount] = getColor(x, y, paletteImage);
-		// That's one more color :)
-		colorCount++;
-	    }
-	}		     
-    }
-
-    // Parse the threshold image
-
-    cout << "Color count : " << colorCount << endl;
-    result = nodither(image, palette, colorCount);
+    result = nodither(image, paletteImage);
 
     // Display the result
     CImgDisplay result_disp(result, "Result");    
