@@ -124,6 +124,32 @@ HSVColor::HSVColor(Color const& c) {
     this->hsv = rgb2hsv(rgb);
 }
 
+/** Return the symmetric color of c about center, constrained to
+    the HSV space. */
+Color HSVColor::getSymmetric(Color const& cRGB, Color const& centerRGB) {
+    HSVColor center = HSVColor(centerRGB);
+    HSVColor c = HSVColor(cRGB);
+    HSVColor symmetric = HSVColor();
+
+    // Calculate the geometrical symmetric
+    symmetric.hsv.h = (int)(2*center.hsv.h - c.hsv.h)%360;
+    symmetric.hsv.s = (2*center.hsv.s - c.hsv.s);
+    symmetric.hsv.v = (2*center.hsv.v - c.hsv.v);
+
+    // Constrain to the HSV space
+    if(symmetric.hsv.s < 0)
+	symmetric.hsv.s = 0;
+    if(symmetric.hsv.s > 100)
+	symmetric.hsv.s = 100;
+    if(symmetric.hsv.v < 0)
+	symmetric.hsv.v = 0;  
+    if(symmetric.hsv.v > 100)
+	symmetric.hsv.v = 100;  
+    // Convert back to RGB color
+    return symmetric.toRGBColor();
+}
+
+
 /** Return this HSVColor as an RGB Color */
 Color HSVColor::toRGBColor() const {
     rgb rgb = hsv2rgb(this->hsv);

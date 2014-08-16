@@ -22,6 +22,11 @@ class HSVColor {
     /** Create an HSVColor from the input Color */
     HSVColor(Color const& c);
 
+
+    /** Return the symmetric color of c about center, constrained to
+	the HSV space. */
+    static Color getSymmetric(Color const& c, Color const& center);
+
     /** Return this HSVColor as an RGB Color */
     Color toRGBColor() const;
 };

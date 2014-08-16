@@ -27,19 +27,16 @@ using namespace cimg_library;
     The reconstructed image will be saved.
 */
 
-
-// Return the p-th value of the 8x8 Bayer threshold matrix
-double bayer8x8(int p) {
-    int q = p ^ (p >> 3);
-    long result = (((p & 4) >> 2) | ((q & 4) >> 1)
-		   | ((p & 2) << 1) | ((q & 2) << 2)
-		   | ((p & 1) << 4) | ((q & 1) << 5));
-    return (double) result / 64;
-}
-
 inline Color getColor(int const x, int const y, CImg<unsigned char> const& image) {
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
 }
+
+inline void setColor(int const x, int const y, CImg<unsigned char> & image, Color const& c) {
+    image(x, y, 0) = c.getR();
+    image(x, y, 1) = c.getG();
+    image(x, y, 2) = c.getB();
+}
+
 
 /** Comparison function between two HSVColor, used to order
     colors. Sort by value, then saturation, then hue */
@@ -150,6 +147,30 @@ void parseThreshold(CImg<unsigned char> const& thresholdImage, double*& threshol
     // Done
 }
 
+/** Iterate over the given palette of size colorCount and return the
+    index of the nearest Color from c. */
+int findIndexNearest(Color c, Color * const palette, int const colorCount) {
+    // Distance between two colors
+    long dist;
+    // The current nearest color is the first...
+    int nearest = 0;
+    long nearestDist = 16777216; // (256*256*256) = maximum value of
+				  // distance2(color1, color2)
+    
+    // Find the closest color in the palette from the pixel's color
+    for (int k = 0 ; k < colorCount ; k++ ) {
+	// Calculate distance to this color
+	dist = Color::distance2(c, palette[k]);
+	// If this is the first best color
+	if (dist < nearestDist) {
+	    // This color becomes the first nearest color
+	    nearestDist = dist;
+	    nearest = k;
+	}
+    }
+    return nearest;
+}
+
 /** Return an non dithered image, made with the input palette */
 CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
 			      CImg<unsigned char> const& paletteImage) {
@@ -160,10 +181,6 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
     Color c;
     // The nearest color index
     int nearest;
-    // Distance of the nearest color
-    long nearestDist;
-    // Distance between two colors
-    long dist;
 
     // The palette colors array
     Color * palette;
@@ -178,22 +195,10 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
 	for (int x = 0 ; x < image.width() ; x++) {
 	    // The color to approximate
 	    c = getColor(x, y, image);
-	    // The current nearest color is the first...
-	    nearest = 0;
-	    nearestDist = 16777216; // (256*256*256) = maximum value
-				    // of distance2(color1, color2)
-	    // Find the closest color in the palette
-	    for (int k = 0 ; k < colorCount ; k++ ) {
-		dist = Color::distance2(c, palette[k]);
-		if (dist < nearestDist) {
-		    nearestDist = dist;
-		    nearest = k;
-		}
-	    }
+	    // Find the nearest color from c
+	    nearest = findIndexNearest(c, palette, colorCount);
 	    // Set the target pixel with this color
-	    reconstructed(x, y, 0) = palette[nearest].getR();
-	    reconstructed(x, y, 1) = palette[nearest].getG();
-	    reconstructed(x, y, 2) = palette[nearest].getB();
+	    setColor(x,y,reconstructed, palette[nearest]);
 	}
     }
 
@@ -310,9 +315,7 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
 		chosen = nearest2;
 	    
 	    // Set the target pixel with this color
-	    dithered(x, y, 0) = palette[chosen].getR();
-	    dithered(x, y, 1) = palette[chosen].getG();
-	    dithered(x, y, 2) = palette[chosen].getB();
+	    setColor(x, y, dithered, palette[chosen]);
 	}
     }
 
@@ -320,12 +323,16 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
     return dithered;
 }
 
-
 /** Return a dithered image, from the paletteImage colors and using
-    the thresholdImage threshold. When mixing colors, takes the nearest  two nearest. */
-CImg<unsigned char> ditherSymmetric(CImg<unsigned char> const& image,
-				    CImg<unsigned char> const& paletteImage,
-				    CImg<unsigned char> const& thresholdImage) {
+    the thresholdImage threshold. When mixing colors, takes the
+    nearest from the pixel's color. Then calculates the symmetric
+    color of the first color about the pixel's color. Finally,
+    searches the nearest color from this calculated symmetric
+    color. The first nearest color and the nearest from symmetric
+    colors are used for dithering. */
+CImg<unsigned char> ditherCompensate(CImg<unsigned char> const& image,
+				     CImg<unsigned char> const& paletteImage,
+				     CImg<unsigned char> const& thresholdImage) {
     // The resulting image, reconstructed from the original with the palette's colors
     CImg<unsigned char> dithered(image.width(), image.height(), 1, 3, 0);
 
@@ -339,10 +346,11 @@ CImg<unsigned char> ditherSymmetric(CImg<unsigned char> const& image,
     long nearestDist1;
     // Distance of the second nearest color
     long nearestDist2;
-    // Distance between two colors
-    long dist;
+
     // The palette colors array
     Color * palette;
+    // The palette colors array as HSVColors
+    HSVColor * paletteHSV;
     // The number of colors in the palette
     int colorCount;
     
@@ -361,42 +369,43 @@ CImg<unsigned char> ditherSymmetric(CImg<unsigned char> const& image,
     // Grab the colors from the palette and set the colorCount
     parsePalette(paletteImage, palette, colorCount);
 
+    // Initialize the paletteHSV
+    paletteHSV = new HSVColor[colorCount];
+    // Fill it
+    for(int k = 0; k < colorCount; k++) {
+	paletteHSV[k] = HSVColor(palette[k]);
+    }
     // For each pixel in the image, find the best two colors
     for (int y = 0 ; y < image.height() ; y++) {
 	for (int x = 0 ; x < image.width() ; x++) {
 	    // The color to approximate
 	    c = getColor(x, y, image);
-	    // The current nearest color is the first...
-	    nearest1 = 0;
-	    nearest2 = 0;
-	    nearestDist1 = 16777216; // (256*256*256) = maximum value
-				    // of distance2(color1, color2)
-	    nearestDist2 = nearestDist2;
-	    // Find the two closest color in the palette
-	    for (int k = 0 ; k < colorCount ; k++ ) {
-		// Calculate distance to this color
-		dist = Color::distance2(c, palette[k]);
-		// If this is the first best color
-		if (dist < nearestDist1) {
-		    // The old first color becomes the new second
-		    nearestDist2 = nearestDist1;
-		    nearest2 = nearest1;
-		    // This color becomes the first nearest color
-		    nearestDist1 = dist;
-		    nearest1 = k;
-		} else {
-		    // Maybe it is better than the second color
-		    if(dist < nearestDist2) {
-			// This becomes the second nearest color
-			nearestDist2 = dist;
-			nearest2 = k;
-		    }
-		}
-	    }
-	    // nearest1 is the first nearest color, nearest2 is the second one 
+	    // Find the nearest color from c in the palette
+	    nearest1 = findIndexNearest(c, palette, colorCount);
+	    nearestDist1 = Color::distance2(c, palette[nearest1]);
+
+	    // Calculate the symmetrical color of nearest1 about c
+	    Color symmetric = HSVColor::getSymmetric(palette[nearest1], c);
+	    
+	    // Find the nearest color from symmetric
+	    nearest2 = findIndexNearest(symmetric, palette, colorCount);
+	    nearestDist2 = Color::distance2(c, palette[nearest2]);
+	    
 
 	    // The corresponding threshold value
 	    double thresholdValue = threshold[(x % tWidth) + tWidth*(y % tHeight)];
+	    // Reorder the two colors if needed (for continuity when
+	    // going closer from the second one)
+	    if(HSVcompare(paletteHSV[nearest1], paletteHSV[nearest2]) > 0) {
+		// Swap the two
+		nearest1 = nearest1 ^ nearest2;
+		nearest2 = nearest1 ^ nearest2;
+		nearest1 = nearest1 ^ nearest2;
+		
+		nearestDist1 = nearestDist1 ^ nearestDist2;
+		nearestDist2 = nearestDist1 ^ nearestDist2;
+		nearestDist1 = nearestDist1 ^ nearestDist2;
+	    }
 	    // Our color is located between two colors :
 	    double value = (double) nearestDist1 / (double) (nearestDist1 + nearestDist2);
 	    // Pick one of the two best color, regarding to the threshold map
@@ -407,15 +416,14 @@ CImg<unsigned char> ditherSymmetric(CImg<unsigned char> const& image,
 		chosen = nearest2;
 	    
 	    // Set the target pixel with this color
-	    dithered(x, y, 0) = palette[chosen].getR();
-	    dithered(x, y, 1) = palette[chosen].getG();
-	    dithered(x, y, 2) = palette[chosen].getB();
+	    setColor(x, y, dithered, palette[chosen]);
 	}
     }
 
     // Return the result
     return dithered;
 }
+
 
 int main(int argc, char* argv[]) {
 
@@ -447,7 +455,7 @@ int main(int argc, char* argv[]) {
     // The dithered result image
     CImg<unsigned char>  result(fileThreshold);
 
-    result = ditherNearest(image, paletteImage, thresholdImage);
+    result = ditherCompensate(image, paletteImage, thresholdImage);
 
     // Display the result
     CImgDisplay result_disp(result, "Result");    
