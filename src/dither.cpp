@@ -4,13 +4,13 @@
 #include <string>
 using namespace std;
 
-#include "CImg-1.5.7/CImg.h"
+#include <CImg.h>
 using namespace cimg_library;
 
-#include "lib/ColorHist.h"
-#include "lib/Color.h"
-#include "lib/HSVColor.h"
-#include "lib/Triplet.h"
+#include "ColorHist.h"
+#include "Color.h"
+#include "HSVColor.h"
+#include "Triplet.h"
 
 
 /** 
