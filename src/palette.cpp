@@ -8,24 +8,32 @@ using namespace std;
 #include <CImg.h>
 using namespace cimg_library;
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 #include "ColorHist.h"
 #include "Color.h"
 #include "HSVColor.h"
 #include "Triplet.h"
 
-
-/** 
-    This program determine the best color palette to use to display an
-    image, using the K-mean algorithm.
-    Use : 'palette %filepath %colorsCount (%outputFile)'
-    Parameters :
-    filepath : The path to the image file.
-    colorsCount : The desired number of colors in the palette used
-    (optional) outputFile : The name for the output palette image file
-    Result :
-    An image containing the palette's colors will be saved under the name
-    'palette-colorCount-imagename'.
-*/
+void usage(const char * progname) {
+  cerr
+    << "Usage: " << endl
+    << "\t" << progname << " imageFile colorsCount [outputFile]" << endl
+    << endl
+    << "This program determines the best color palette to use to display an" << endl
+    << "image, using the K-mean algorithm." << endl
+    << endl
+    << "Parameters:" << endl
+    << "\timageFile: path to the image file." << endl
+    << "\tcolorsCount: desired number of colors in the palette used" << endl
+    << "\toutputFile: name for the output palette image file" << endl
+    << "\t(default outputFile 'palette-colorCount-<imageFile>.png')" << endl
+    << endl
+    << "Result:" << endl
+    << "\tAn image containing the palette's colors will be saved." << endl;
+  exit(1);
+}
 
 
 /** This struct represent a point in the RGB space, along with the
@@ -61,7 +69,7 @@ int HSVcompare (const void * a, const void * b)
 CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K) {
 
     // Create a display for the original image
-    CImgDisplay orig_disp(image, "Original");
+    // CImgDisplay orig_disp(image, "Original");
   
     // The list of the uniques colors from the image. It corresponds to
     // the points (in RGB space) for the K-mean algorithm.
@@ -89,7 +97,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     // Temporary weight
     long weight;
 
-    // The centers of the clusters in the k-mean algorithm. At the end :
+    // The centers of the clusters in the k-mean algorithm. At the end:
     // the computed color palette
     Color * kmean = new Color[K];
     // The next computed kmeans. Acts as an intermediate buffer 
@@ -202,7 +210,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 	    // Update the kmean
 	    kmean[i] = c;
 	}
-	cout << ".";
+	cout << "+";
 	cout.flush();
     }
     // The algorithm has converged. The kmean represent our colors
@@ -264,7 +272,7 @@ int main(int argc, char* argv[]) {
     // The image file path
     char * file;
     // The output destination file path
-    char * outputFile;
+    string outputFile;
     // The corresponding image
     CImg<unsigned char> image;
     // The generated palette image
@@ -276,8 +284,7 @@ int main(int argc, char* argv[]) {
     // If not enough arguments were given when called
     if (argc < 3) {
 	// Display an error and exit
-	cerr << "Expected : " << argv[0] << " %filepath %colorsCount" << endl;
-	exit(1);
+      usage(argv[0]);
     }
   
     // Retrieve the file path argument
@@ -285,13 +292,26 @@ int main(int argc, char* argv[]) {
     // Retrieve the number of colors argument
     K = atoi(argv[2]);
     // If was given the output file name
-    if(argc == 4) 
-	outputFile = argv[3];
+    if(argc == 4) {
+      outputFile = string(argv[3]);
+    } else {
+      // or create a generic file name
+      stringstream ss;
+      ss << K;
+      fs::path pathname(file);
+      string dirname  = pathname.parent_path().string();
+      string basename = pathname.filename().string();
+
+      outputFile =
+	dirname + "/"
+	+ "palette-" + ss.str() + "-"
+	+ basename + ".png";
+    }
     // Check that K is between 2 and 65536
     if(K < 2 || K > 65536) {
 	// Error and exit
-	cerr << "Color Count must be in [2;65536]" << endl;
-	exit(1);
+      cerr << "*** Color Count must be between 2 and 65536!" << endl << endl;
+	usage(argv[0]);
     }
 
     // Create the image
@@ -301,19 +321,8 @@ int main(int argc, char* argv[]) {
 
 
     // Save the palette image
-    if(argc == 4) {
-	palette.save(outputFile);
-	cout << "Saved to " << outputFile << endl;
-    } else {
-	// Create a generic file name
-	stringstream ss;
-	ss << K;
-	string string_palette = "palette-" + ss.str() + "-" + std::string(file) + ".png";
-	const char * char_palette = string_palette.c_str();
-	cout << "Saving..." << endl;
-	palette.save(char_palette);
-	cout << endl << "Palette image saved under " << char_palette << endl;
-    }
+    palette.save(outputFile.c_str());
+    cout << "Saved to " << outputFile << endl;
 
     return 0;
 }

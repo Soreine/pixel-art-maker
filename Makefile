@@ -17,7 +17,10 @@ CPPFLAGS = \
 	 -Dcimg_use_vt100 -Dcimg_use_png \
 	 -Iinclude -I/usr/X11R6/include
 
-LDFLAGS =  -L/usr/X11R6/lib -lpthread -lpng -lz -lX11 -lm 
+LDFLAGS = \
+	-lboost_filesystem -lboost_system \
+	-L/usr/X11R6/lib \
+	-lpthread -lpng -lz -lX11 -lm 
 
 # general targets
 

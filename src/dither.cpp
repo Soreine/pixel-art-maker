@@ -7,26 +7,34 @@ using namespace std;
 #include <CImg.h>
 using namespace cimg_library;
 
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+
 #include "ColorHist.h"
 #include "Color.h"
 #include "HSVColor.h"
 #include "Triplet.h"
 
 
-/** 
-    This program loads a palette image and an image and then try to
-    display this image using the computed palette and a given
-    threshold matrix.
-    Use : 'dither %paletteFile %thresholdPattern %imageFile (%outputFile)'
-    Parameters :
-    paletteFile : The path to the palette file.
-    thresholdPattern : The path to an image used as a threshold matrix
-    imageFile : The path to the image file to dither
-    outputFile : The result image will be saved under this name
-    Result :
-    The reconstructed image will be saved.
-*/
-
+void usage(const char * progname) {
+  cerr
+    << "Usage: " << endl
+    << "\t" << progname << " imageFile paletteFile thresholdFile [outputFile]" << endl
+    << endl
+    << "This program loads a palette image and an image and then try to" << endl
+    << "display this image using the computed palette and a given" << endl
+    << "threshold matrix." << endl
+    << endl
+    << "Parameters:" << endl
+    << "\timageFile: path to the image file to dither" << endl
+    << "\tpaletteFile: path to the palette file." << endl
+    << "\tthresholdPattern: path to an image used as a threshold matrix" << endl
+    << "\toutputFile: result image will be saved under this name" << endl
+    << endl
+    << "Result:" << endl
+    << "\tIf outputFile is provided, the reconstructed image will be saved." << endl;
+  exit(1);
+}
 
 // Return the p-th value of the 8x8 Bayer threshold matrix
 double bayer8x8(int p) {
@@ -429,8 +437,7 @@ int main(int argc, char* argv[]) {
     // If not enough arguments were given when called
     if (argc != 4 && argc != 5) {
 	// Display an error and exit
-	cerr << "Expected : " << argv[0] << " %imageFile %paletteFile %thresholdFile" << endl;
-	exit(1);
+      usage(argv[0]);
     }
   
     fileImage = argv[1];
@@ -455,21 +462,25 @@ int main(int argc, char* argv[]) {
     cout << "Enter to finish" << endl;
     cin.ignore();
 
-    /*
     // Save dithered image
+    string outputFilename;
     if(argc >= 5) {
-	result.save(outputFile);
+      outputFilename = string(argv[4]);
     } else {
 	// Create a generic file name
-	string string_output = std::string(filePalette) + "-" 
-	    + std::string(fileThreshold) + "-dithered-" + std::string(fileImage);
-	const char * char_output = string_palette.c_str();
-	result.save(char_output);
-	cout << endl << "Palette image saved under " << char_output << endl;
-    }
-    */
+      fs::path pathname(fileImage);
+      string dirname  = pathname.parent_path().string();
+      string basename = pathname.filename().string();
 
-    if(argc == 5)
-	result.save(argv[4]);
+      fs::path palettepathname(filePalette);
+      string palettebasename = palettepathname.filename().string();
+
+      outputFilename = dirname + "/"
+	+ basename + "-dithered-by-" + palettebasename + + ".png";
+    }
+
+    result.save(outputFilename.c_str());
+    cout << "Saved to " << outputFilename << endl;
+
     return 0;
 }
