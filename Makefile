@@ -6,9 +6,9 @@ COMMON_SRC = src/ColorHist.cpp \
 PALETTE_SRC = src/palette.cpp
 DITHER_SRC = src/dither.cpp
 
-COMMON_OBJ = $(COMMON_SRC:.cpp=.o)
-PALETTE_OBJ = $(PALETTE_SRC:.cpp=.o)
-DITHER_OBJ = $(DITHER_SRC:.cpp=.o)
+COMMON_OBJ = $(COMMON_SRC:src/%.cpp=obj/%.o)
+PALETTE_OBJ = $(PALETTE_SRC:src/%.cpp=obj/%.o)
+DITHER_OBJ = $(DITHER_SRC:src/%.cpp=obj/%.o)
 
 TARGET = palette dither
 
@@ -17,14 +17,17 @@ CPPFLAGS = \
 	 -Dcimg_use_vt100 -Dcimg_use_png \
 	 -Iinclude -I/usr/X11R6/include
 
-LDFLAGS =  -L/usr/X11R6/lib -lpthread -lpng -lz -lX11 -lm 
+LDFLAGS = \
+	-lboost_filesystem -lboost_system \
+	-L/usr/X11R6/lib \
+	-lpthread -lpng -lz -lX11 -lm 
 
 # general targets
 
 all: $(TARGET)
 
 clean:
-	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ)
+	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) obj
 
 dist_clean: clean
 	rm -fr $(TARGET)
@@ -36,6 +39,9 @@ palette: $(PALETTE_OBJ) $(COMMON_OBJ)
 
 dither: $(DITHER_OBJ) $(COMMON_OBJ)
 	g++ -o $@ $(DITHER_OBJ) $(COMMON_OBJ) $(LDFLAGS)
+
+obj:
+	mkdir obj
 
 # dependencies
 
@@ -53,6 +59,6 @@ src/dither.o: \
 
 # generic rules
 
-%.o: %.cpp
+obj/%.o: src/%.cpp obj
 	g++ $(CPPFLAGS) -c -o $@ $< 
 
