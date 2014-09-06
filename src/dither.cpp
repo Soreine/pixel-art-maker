@@ -470,13 +470,13 @@ int main(int argc, char* argv[]) {
 	// Create a generic file name
       fs::path pathname(fileImage);
       string dirname  = pathname.parent_path().string();
-      string basename = pathname.filename().string();
+      string basename = pathname.stem().string();
 
       fs::path palettepathname(filePalette);
-      string palettebasename = palettepathname.filename().string();
+      string palettebasename = palettepathname.stem().string();
 
       outputFilename = dirname + "/"
-	+ basename + "-dithered-by-" + palettebasename + + ".png";
+	+ basename + "-dithered-by-" + palettebasename + ".png";
     }
 
     result.save(outputFilename.c_str());
