@@ -1,16 +1,32 @@
+
+# sources
+
 COMMON_SRC = src/ColorHist.cpp \
 	     src/Color.cpp \
 	     src/HSVColor.cpp \
 	     src/Triplet.cpp
 
+COMMON_INCLUDE = $(COMMON_SRC:src/%.cpp=include/%.h)
+
 PALETTE_SRC = src/palette.cpp
+
 DITHER_SRC = src/dither.cpp
+
+# object files
 
 COMMON_OBJ = $(COMMON_SRC:src/%.cpp=obj/%.o)
 PALETTE_OBJ = $(PALETTE_SRC:src/%.cpp=obj/%.o)
 DITHER_OBJ = $(DITHER_SRC:src/%.cpp=obj/%.o)
 
-TARGET = palette dither
+ALL_OBJ = $(COMMON_OBJ) $(PALETTE_OBJ) $(DITHER_OBJ)
+
+# dependencies
+
+ALL_DEPS = $(ALL_OBJ:%.o=%.d)
+
+# misc.
+
+TARGETS = palette dither
 
 CPPFLAGS = \
 	 -g -Wall -W -ansi -pedantic \
@@ -27,7 +43,7 @@ LDFLAGS = \
 all: $(TARGET)
 
 clean:
-	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) obj
+	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ)
 
 dist_clean: clean
 	rm -fr $(TARGET)
@@ -40,25 +56,13 @@ palette: $(PALETTE_OBJ) $(COMMON_OBJ)
 dither: $(DITHER_OBJ) $(COMMON_OBJ)
 	g++ -o $@ $(DITHER_OBJ) $(COMMON_OBJ) $(LDFLAGS)
 
-obj:
-	mkdir obj
+# include dependencies (if they exist)
 
-# dependencies
+-include $(ALL_DEPS)
 
-src/palette.o: \
-	include/Color.h \
-	include/ColorHist.h \
-	include/Triplet.h \
-	include/HSVColor.h
+# generic rules (with automatic generation of dependencies and automagic
+# creation of obj directory)
 
-src/dither.o: \
-	include/Color.h \
-	include/ColorHist.h \
-	include/Triplet.h \
-	include/HSVColor.h
-
-# generic rules
-
-obj/%.o: src/%.cpp obj
-	g++ $(CPPFLAGS) -c -o $@ $< 
-
+obj/%.o: src/%.cpp
+	@mkdir obj 2>/dev/null || true
+	g++ -MMD $(CPPFLAGS) -c -o $@ $<
