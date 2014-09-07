@@ -19,7 +19,7 @@ namespace fs = boost::filesystem;
 void usage(const char * progname) {
   cerr
     << "Usage: " << endl
-    << "\t" << progname << " imageFile paletteFile thresholdFile [outputFile]" << endl
+    << "\t" << progname << " imageFile paletteFile patternFile [outputFile]" << endl
     << endl
     << "This program loads a palette image and an image and then try to" << endl
     << "display this image using the computed palette and a given" << endl
@@ -28,11 +28,12 @@ void usage(const char * progname) {
     << "Parameters:" << endl
     << "\timageFile: path to the image file to dither" << endl
     << "\tpaletteFile: path to the palette file." << endl
-    << "\tthresholdPattern: path to an image used as a threshold matrix" << endl
+    << "\tpatternFile: path to the image to use as a dithering pattern" << endl
     << "\toutputFile: result image will be saved under this name" << endl
+    << "\t            (default to <imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png)" << endl
     << endl
     << "Result:" << endl
-    << "\tIf outputFile is provided, the reconstructed image will be saved." << endl;
+    << "\tA dithered image will be saved." << endl;
   exit(1);
 }
 
@@ -378,7 +379,7 @@ CImg<unsigned char> ditherSymmetric(CImg<unsigned char> const& image,
 	    nearest1 = 0;
 	    nearest2 = 0;
 	    nearestDist1 = 16777216; // (256*256*256) = maximum value
-				    // of distance2(color1, color2)
+	    // of distance2(color1, color2)
 	    nearestDist2 = nearestDist2;
 	    // Find the two closest color in the palette
 	    for (int k = 0 ; k < colorCount ; k++ ) {
@@ -437,7 +438,7 @@ int main(int argc, char* argv[]) {
     // If not enough arguments were given when called
     if (argc != 4 && argc != 5) {
 	// Display an error and exit
-      usage(argv[0]);
+	usage(argv[0]);
     }
   
     fileImage = argv[1];
@@ -465,18 +466,22 @@ int main(int argc, char* argv[]) {
     // Save dithered image
     string outputFilename;
     if(argc >= 5) {
-      outputFilename = string(argv[4]);
+	outputFilename = string(argv[4]);
     } else {
 	// Create a generic file name
-      fs::path pathname(fileImage);
-      string dirname  = pathname.parent_path().string();
-      string basename = pathname.stem().string();
+	fs::path pathname(fileImage);
+	string dirname  = pathname.parent_path().string();
+	string basename = pathname.stem().string();
 
-      fs::path palettepathname(filePalette);
-      string palettebasename = palettepathname.stem().string();
+	fs::path palettepathname(filePalette);
+	string palettebasename = palettepathname.stem().string();
 
-      outputFilename = dirname + "/"
-	+ basename + "-dithered-by-" + palettebasename + ".png";
+	fs::path patternpathname(fileThreshold);
+	string patternbasename = patternpathname.stem().string();
+
+	outputFilename = dirname + "/"
+	    + basename + "-dithered-by-" + palettebasename 
+	    + "-with-" + patternbasename + ".png";
     }
 
     result.save(outputFilename.c_str());
