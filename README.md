@@ -31,6 +31,7 @@ try out something else !
 ### Example
 
 Original picture:
+
 ![Original Picture](/README/paraglider.png)
 
 Assuming you are located at the root of the repo, you can generate a
@@ -40,6 +41,7 @@ it with an 8x8 Bayer pattern like this:
 	$ ./palette picture.png 16 palette.png
 
 Now you have an optimized 16 colors palette:
+
 ![16 color palette](/README/paraglider-palette.png)
 
 You can now dither this same picture, using for example the `bayer8.png` pattern:
@@ -47,6 +49,7 @@ You can now dither this same picture, using for example the `bayer8.png` pattern
 	$ ./dither picture.png palette.png examples/bayer8.png dithered-picture.png
 
 Result:
+
 ![Dithered picture](/README/bayer-dithered-paraglider.png)
 
 Although the output from the `palette` command can be used as the
