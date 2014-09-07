@@ -300,7 +300,7 @@ int main(int argc, char* argv[]) {
       ss << K;
       fs::path pathname(file);
       string dirname  = pathname.parent_path().string();
-      string basename = pathname.filename().string();
+      string basename = pathname.stem().string();
 
       outputFile =
 	dirname + "/"
