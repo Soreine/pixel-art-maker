@@ -32,7 +32,7 @@ try out something else !
 
 Original picture:
 
-![Original Picture](/README/paraglider.png)
+![Original Picture](/readme/paraglider.png)
 
 Assuming you are located at the root of the repo, you can generate a
 16 colors palette for the example picture `paraglider.png` and dither
@@ -42,15 +42,20 @@ it with an 8x8 Bayer pattern like this:
 
 Now you have an optimized 16 colors palette:
 
-![16 color palette](/README/paraglider-palette.png)
+![16 color palette](/readme/paraglider-palette.png)
 
 You can now dither this same picture, using for example the `bayer8.png` pattern:
 
 	$ ./dither picture.png palette.png examples/bayer8.png dithered-picture.png
 
+The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
+
+![8x8 Bayer Matrix](/readme/zoomBayer8.png)
+
+
 Result:
 
-![Dithered picture](/README/bayer-dithered-paraglider.png)
+![Dithered picture](/readme/bayer-dithered-paraglider.png)
 
 Although the output from the `palette` command can be used as the
 palette argument for the `dither` command, this is not mandatory.
