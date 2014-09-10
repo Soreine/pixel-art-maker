@@ -100,9 +100,15 @@ dependencies, listed here as Debian packages:
 * `libboost-filesystem-dev`: The Boost Filesystem Library. Used to
   manipulate paths and files.
 
-	$ sudo apt-get install libboost-filesystem-dev cimg-dev
+```
+$ sudo apt-get install libboost-filesystem-dev cimg-dev
+```
 
 Then you can compile the project using the provided `Makefile`:
 
-	$ make dither
-	$ make palette
+```
+$ make dither
+$ make palette
+```
+
+
