@@ -1,5 +1,9 @@
 # PixelArtMaker
 
+Generate palettes and dither any image with personal patterns.
+
+![Example](readme/process.png)
+
 
 ## What is it ?
 
@@ -32,7 +36,7 @@ try out something else !
 
 Original picture:
 
-![Original Picture](/readme/paraglider.png)
+![Original Picture](readme/paraglider.png)
 
 Assuming you are located at the root of the repo, you can generate a
 16 colors palette for the example picture `paraglider.png` and dither
@@ -42,7 +46,7 @@ it with an 8x8 Bayer pattern like this:
 
 Now you have an optimized 16 colors palette:
 
-![16 color palette](/readme/paraglider-palette.png)
+![16 color palette](readme/paraglider-palettex8.png)
 
 You can now dither this same picture, using for example the `bayer8.png` pattern:
 
@@ -50,12 +54,12 @@ You can now dither this same picture, using for example the `bayer8.png` pattern
 
 The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
 
-![8x8 Bayer Matrix](/readme/zoomBayer8.png)
+![8x8 Bayer Matrix](readme/zoomBayer8.png)
 
 
 Result:
 
-![Dithered picture](/readme/bayer-dithered-paraglider.png)
+![Dithered picture](readme/bayer-dithered-paraglider.png)
 
 Although the output from the `palette` command can be used as the
 palette argument for the `dither` command, this is not mandatory.
