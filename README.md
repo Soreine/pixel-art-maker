@@ -32,6 +32,8 @@ try out something else !
 
 ## Usage
 
+The `bin/` folder contains the two already compiled executables `palette` and `dither`.
+
 ### Example
 
 Original picture:
@@ -89,5 +91,18 @@ Parameters:
 
 
 
+## Build
 
+In order to build the project, you will need the following
+dependencies, listed here as Debian packages:
 
+* `cimg-dev`: This is CImg library, the C++ image processing library used by the project.
+* `libboost-filesystem-dev`: The Boost Filesystem Library. Used to
+  manipulate paths and files.
+
+	$ sudo apt-get install libboost-filesystem-dev cimg-dev
+
+Then you can compile the project using the provided `Makefile`:
+
+	$ make dither
+	$ make palette
