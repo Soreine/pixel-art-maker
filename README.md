@@ -5,12 +5,12 @@ Generate palettes and dither any image with personal patterns.
 ![Example](readme/process.png)
 
 ## Index
-- [What is it ?](#-what-is-it-)
-- [Usage](#-usage)
-  * [Example](#-example)
-  * [Palette generation](#-palette-generation)
-  * [Dithering](#-dithering)
-- [Build](#-build)
+- [What is it ?](#what-is-it-)
+- [Usage](#usage)
+  * [Example](#example)
+  * [Palette generation](#palette-generation)
+  * [Dithering](#dithering)
+- [Build](#build)
 
 
 ## What is it ?
