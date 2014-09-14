@@ -4,8 +4,16 @@ Generate palettes and dither any image with personal patterns.
 
 ![Example](readme/process.png)
 
+## Index
+- [What is it ?](#what-is-it)
+- [Usage](#usage)
+  * [Example](#example)
+  * [Palette generation](#palette-generation)
+  * [Dithering](#dithering)
+- [Build](#build)
 
-## What is it ?
+
+## <a name="what-is-it"></a> What is it ?
 
 PixelArtMaker is a two-features graphics tool designed around the
 style of [Pixel Art](http://en.wikipedia.org/wiki/Pixel_art). These
@@ -30,11 +38,11 @@ creation. Draw a pattern image, define your palette and launch the
 dithering. If you like the result, use it (possibly tweaking it) or
 try out something else !
 
-## Usage
+## <a name="usage"></a> Usage
 
 The `bin/` folder contains the two already compiled executables `palette` and `dither`.
 
-### Example
+### <a name="example"></a> Example
 
 Original picture:
 
@@ -66,7 +74,7 @@ Result:
 Although the output from the `palette` command can be used as the
 palette argument for the `dither` command, this is not mandatory.
 
-### Palette generation
+### <a name="palette-generation"></a> Palette generation
 
 Syntax: `./palette imageFile colorsCount [outputFile]`
 
@@ -77,7 +85,7 @@ Parameters:
 * (optional) `outputFile`: name of the output palette image file
   (default to `palette-<colorsCount>-<imageFile>.png`)
 
-### Dithering
+### <a name="dithering"></a> Dithering
 
 Syntax: `./dither  imageFile paletteFile patternFile [outputFile]`
 
@@ -91,7 +99,7 @@ Parameters:
 
 
 
-## Build
+## <a name="build"></a> Build
 
 In order to build the project, you will need the following
 dependencies, listed here as Debian packages:
