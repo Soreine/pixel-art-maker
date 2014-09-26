@@ -6,6 +6,10 @@ Generate palettes and dither any image with personal patterns.
 
 ## Index
 - [What is it ?](#what-is-it-)
+- [How does it actually work ?](#how-does-it-actually-work-)
+  * [The dithering process](#the-dithering-process)
+  * [The making of a simple pattern](#the-making-of-a-simple-pattern)
+  * [An advanced pattern](#an-advanced-pattern)
 - [Usage](#usage)
   * [Example](#example)
   * [Palette generation](#palette-generation)
@@ -94,8 +98,8 @@ distance between C1 and C plus the distance between C and C2.
 
 Now it's simple, if the corresponding pattern pixel is 30% or less
 bright, then choose C1, else choose C2. Applying a 30% threshold to
-the pattern image will show as black all the pixel that will choose C1
-and as white all the pixels that will choose C2.
+the pattern image will show as black all the pixels that will choose
+C1 and as white all the pixels that will choose C2.
 
 ![Threshold](readme/threshold.png)
 
