@@ -24,7 +24,7 @@ two functionalities are :
   arbitrary color palette, using a user-defined pattern.
 
 The palette generation is made using a
-[k-means clustering](http://en.wikipedia.org/wiki/K-means_clustering)
+[K-means clustering](http://en.wikipedia.org/wiki/K-means_clustering)
 algorithm that tries to find the set of K colors that average best the
 colors of the input image.
 
@@ -37,6 +37,21 @@ artists wanting to try out some artistic patterns in their
 creation. Draw a pattern image, define your palette and launch the
 dithering. If you like the result, use it (possibly tweaking it) or
 try out something else !
+
+## How does it actually work ?
+
+The algorithm that generate the palette is pretty straightforward as
+it is a strict use of the
+[K-means clustering](http://en.wikipedia.org/wiki/K-means_clustering),
+plus using it doesn't require to understand it. Just note that the
+generated palette is *likely to have a shorter dynamic range* than the
+original picture, so you may want to correct this afterward with any
+image manipulation program.
+
+While the palette generation does not require a precise understanding
+of its mechanics in order to be used, it is advised to grasp some of
+the underlying process when it comes to dithering.
+
 
 ## Usage
 
