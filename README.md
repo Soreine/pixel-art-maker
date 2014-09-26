@@ -41,16 +41,71 @@ try out something else !
 ## How does it actually work ?
 
 The algorithm that generate the palette is pretty straightforward as
-it is a strict use of the
-[K-means clustering](http://en.wikipedia.org/wiki/K-means_clustering),
-plus using it doesn't require to understand it. Just note that the
-generated palette is *likely to have a shorter dynamic range* than the
-original picture, so you may want to correct this afterward with any
-image manipulation program.
+it is a strict use of the [K-means
+clustering](http://en.wikipedia.org/wiki/K-means_clustering) with
+pixels treated as point in the RGB space. Plus, it can be used without
+being understood thoroughly. Just note that the generated palette is
+*likely to have a shorter dynamic range* than the original picture, so
+you might want to correct this afterward with any image manipulation
+program.
 
 While the palette generation does not require a precise understanding
 of its mechanics in order to be used, it is advised to grasp some of
-the underlying process when it comes to dithering.
+the underlying process when it comes to dithering. Thus the following
+sections.
+
+### The dithering process
+
+The dithering algorithm works as follow :
+
+* Retrieve every unique color from the palette image
+* For each pixel in the original picture
+  1. Find the two closest colors from the palette. These are the
+     colors used to reproduce the original color.
+  2. According to the brightness of the corresponding pattern pixel,
+     choose the first or the second color.
+  3. Fill this same pixel in the output image with the chosen color.
+
+Step 2 needs some explanations.
+
+##### Which pixel in the pattern image is associated to which pixel in the original picture ? 
+
+Well, it is the pixel with the same coordinates, modulo the width and
+height of the pattern image. If the pixel coordinates in the original
+picture are `(x,y)`, and the pattern image has a `w` pixels width and
+a `h` pixels height, then the `(i,j)` coordinates of the corresponding
+pixel in the pattern image are such that :
+
+    i = x modulo w
+    j = y modulo h
+
+In other words, if you tile the original picture with the pattern
+image, you obtain the link between each pixel.
+
+##### How does it choose between the first or second color ?
+
+Let's take an example : the color of the original pixel is C, and the
+two closest colors in the palette are C1 and C2. We can calculate the
+distance between these colors. Let's say that C stands at 30% between
+C1 and C2, that is, the distance between C1 and C equals 30% of the
+distance between C1 and C plus the distance between C and C2.
+
+![Intermediate color](readme/between.png)
+
+Now it's simple, if the corresponding pattern pixel is 30% or less
+bright, then choose C1, else choose C2. Applying a 30% threshold to
+the pattern image will show as black all the pixel that will choose C1
+and as white all the pixels that will choose C2.
+
+![Threshold](readme/threshold.png)
+
+### The making of a simple pattern
+
+![Simple pattern](readme/simple.png)
+
+### An advanced pattern
+
+![Advanced pattern](readme/flake.png)
 
 
 ## Usage
