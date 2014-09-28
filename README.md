@@ -6,14 +6,13 @@ Generate palettes and dither any image with personal patterns.
 
 ## Index
 - [What is it ?](#what-is-it-)
-- [How does it actually work ?](#how-does-it-actually-work-)
-  * [The dithering process](#the-dithering-process)
-  * [The making of a simple pattern](#the-making-of-a-simple-pattern)
-  * [An advanced pattern](#an-advanced-pattern)
 - [Usage](#usage)
   * [Example](#example)
   * [Palette generation](#palette-generation)
   * [Dithering](#dithering)
+- [How does it actually work ?](#how-does-it-actually-work-)
+  * [The dithering process](#the-dithering-process)
+  * [Making a custom pattern](#making-a-custom-pattern)
 - [Build](#build)
 
 
@@ -41,6 +40,65 @@ artists wanting to try out some artistic patterns in their
 creation. Draw a pattern image, define your palette and launch the
 dithering. If you like the result, use it (possibly tweaking it) or
 try out something else !
+
+## Usage
+
+The `bin/` folder contains the two already compiled executables `palette` and `dither`.
+
+### Example
+
+Original picture:
+
+![Original Picture](readme/paraglider.png)
+
+Assuming you are located at the root of the repo, you can generate a
+16 colors palette for the example picture `paraglider.png` and dither
+it with an 8x8 Bayer pattern like this:
+
+	$ ./palette picture.png 16 palette.png
+
+Now you have an optimized 16 colors palette:
+
+![16 color palette](readme/paraglider-palettex8.png)
+
+You can now dither this same picture, using for example the `bayer8.png` pattern:
+
+	$ ./dither picture.png palette.png examples/bayer8.png dithered-picture.png
+
+The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
+
+![8x8 Bayer Matrix](readme/zoomBayer8.png)
+
+
+Result:
+
+![Dithered picture](readme/bayer-dithered-paraglider.png)
+
+Although the output from the `palette` command can be used as the
+palette argument for the `dither` command, this is not mandatory.
+
+### Palette generation
+
+Syntax: `./palette imageFile colorsCount [outputFile]`
+
+Parameters:
+
+* `imageFile`: path to the image file that needs an optimized palette
+* `colorsCount`: desired number of colors in the palette
+* (optional) `outputFile`: name of the output palette image file
+  (default to `palette-<colorsCount>-<imageFile>.png`)
+
+### Dithering
+
+Syntax: `./dither  imageFile paletteFile patternFile [outputFile]`
+
+Parameters:
+
+* `imageFile`: path to the image file to dither
+* `paletteFile`: path to the palette to use
+* `patternFile`: path to the image used as a dithering pattern
+* (optional) `outputFile`: result image will be saved under this name
+  (default to `<imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png`)
 
 ## How does it actually work ?
 
@@ -103,74 +161,24 @@ C1 and as white all the pixels that will choose C2.
 
 ![Threshold](readme/threshold.png)
 
-### The making of a simple pattern
+### Making a custom pattern
 
-![Simple pattern](readme/simple.png)
+You can, and you are encouraged to design patterns of your own. So
+here are some tips that help making fun patterns :
 
-### An advanced pattern
-
-![Advanced pattern](readme/flake.png)
-
-
-## Usage
-
-The `bin/` folder contains the two already compiled executables `palette` and `dither`.
-
-### Example
-
-Original picture:
-
-![Original Picture](readme/paraglider.png)
-
-Assuming you are located at the root of the repo, you can generate a
-16 colors palette for the example picture `paraglider.png` and dither
-it with an 8x8 Bayer pattern like this:
-
-	$ ./palette picture.png 16 palette.png
-
-Now you have an optimized 16 colors palette:
-
-![16 color palette](readme/paraglider-palettex8.png)
-
-You can now dither this same picture, using for example the `bayer8.png` pattern:
-
-	$ ./dither picture.png palette.png examples/bayer8.png dithered-picture.png
-
-The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
-
-![8x8 Bayer Matrix](readme/zoomBayer8.png)
-
-
-Result:
-
-![Dithered picture](readme/bayer-dithered-paraglider.png)
-
-Although the output from the `palette` command can be used as the
-palette argument for the `dither` command, this is not mandatory.
-
-### Palette generation
-
-Syntax: `./palette imageFile colorsCount [outputFile]`
-
-Parameters:
-
-* `imageFile`: path to the image file that needs an optimized palette
-* `colorsCount`: desired number of colors in the palette
-* (optional) `outputFile`: name of the output palette image file
-  (default to `palette-<colorsCount>-<imageFile>.png`)
-
-### Dithering
-
-Syntax: `./dither  imageFile paletteFile patternFile [outputFile]`
-
-Parameters:
-
-* `imageFile`: path to the image file to dither
-* `paletteFile`: path to the palette to use
-* `patternFile`: path to the image used as a dithering pattern
-* (optional) `outputFile`: result image will be saved under this name
-  (default to `<imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png`)
-
+* __Avoid using plain white or plain black__. A #FFFFFF white or a #000000
+  black will results in pixels that are forced to one of the two
+  closest colors, thus revealing really obvious pattern in the
+  dithering process.
+* __Use small images for patterns__. Larger than 16x16 is not
+  recommended...
+* Each shade of gray will correspond to a unique pattern used in a
+  unique range of color mixing. __So try adjusting the different
+  brightness percentages to fit best the ratio of drawn pixels over
+  the total number of pixels in your pattern__. For example, if you
+  draw some 40% gray pixels, then the number of these pixels plus all
+  the darker pixels in your pattern should make at least 40% of the
+  pixel total.
 
 ## Build
 
