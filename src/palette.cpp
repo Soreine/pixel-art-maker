@@ -46,7 +46,7 @@ struct point {
 };
 
 
-inline Color getPixel(int const x, int const y, CImg<unsigned char> const& image) {
+inline Color getColor(int const x, int const y, CImg<unsigned char> const& image) {
     return Color(image(x, y, 0), image(x, y, 1), image(x, y, 2));
 }
 
@@ -108,7 +108,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     for (int y = 0 ; y < image.height() ; y++) {
 	for (int x = 0 ; x < image.width() ; x++) { // For each pixel
 	    // 
-	    p.color = getPixel(x, y, image);
+	    p.color = getColor(x, y, image);
 	    p.cluster = 0; 
 	    // Add the color to the histogram
 	    if (!ch.addColor(p.color))

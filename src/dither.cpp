@@ -82,6 +82,12 @@ int HSVcompare (HSVColor const& a, HSVColor const& b) {
     parameter. */
 void parsePalette(CImg<unsigned char> const& paletteImage,
 		  Color*& palette, int& colorCount) {
+    // A color histogram to check that we take each unique color only
+    // once
+    ColorHist ch;
+
+    Color c;
+    
     // Initialize the number of colors
     colorCount = 0;
 
@@ -93,10 +99,14 @@ void parsePalette(CImg<unsigned char> const& paletteImage,
 	for(int x = 0; x < paletteImage.width(); x++) {
 	    // If not transparent
 	    if(paletteImage(x, y, 3) > 0) {
-		// Add the color
-		palette[colorCount] = getColor(x, y, paletteImage);
-		// That's one more color :)
-		colorCount++;
+                c = getColor(x, y, paletteImage);
+                // Add the color to the histogram and check it was
+                // absent before
+                if (!ch.addColor(c)) {
+                    // That's one more color :)
+                    palette[colorCount] = c;
+                    colorCount++;
+                }
 	    }
 	}		     
     }
