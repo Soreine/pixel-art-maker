@@ -1,4 +1,4 @@
-# PixelArtMaker
+# Pixel Art Maker
 
 Generate palettes and dither any image with personal patterns.
 
@@ -18,7 +18,7 @@ Generate palettes and dither any image with personal patterns.
 
 ## What is it ?
 
-PixelArtMaker is a two-features graphics tool designed around the
+Pixel Art Maker is a two-features graphics tool designed around the
 style of [Pixel Art](http://en.wikipedia.org/wiki/Pixel_art). These
 two functionalities are :
 
