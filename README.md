@@ -43,7 +43,8 @@ try out something else !
 
 ## Usage
 
-The `bin/` folder contains the two already compiled executables `palette` and `dither`.
+You can build the two binaries `dither` and `palette` by following the
+instructions in the *Build* section.
 
 ### Example
 
