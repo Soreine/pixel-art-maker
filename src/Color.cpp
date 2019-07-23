@@ -5,23 +5,28 @@
 
 Color::Color() {}
 
-Color::Color(unsigned char rVal, unsigned char gVal, unsigned char bVal) : r(rVal), g(gVal), b(bVal) {
+Color::Color(unsigned char rVal, unsigned char gVal, unsigned char bVal) : r(rVal), g(gVal), b(bVal)
+{
 }
 
-unsigned char Color::getR() const {
+unsigned char Color::getR() const
+{
     return this->r;
 }
 
-unsigned char Color::getG() const {
+unsigned char Color::getG() const
+{
     return this->g;
 }
 
-unsigned char Color::getB() const {
+unsigned char Color::getB() const
+{
     return this->b;
 }
 
 
-double Color::distance(Color const& c1, Color const& c2){
+double Color::distance(Color const& c1, Color const& c2)
+{
     /*
       typedef struct {
       unsigned char r, g, b;
@@ -50,7 +55,8 @@ double Color::distance(Color const& c1, Color const& c2){
 
 }
 
-long Color::distance2(Color const& c1, Color const& c2){
+long Color::distance2(Color const& c1, Color const& c2)
+{
     long r = (long) (c1.getR() - c2.getR());
     long g = (long) (c1.getG() - c2.getG());
     long b = (long) (c1.getB() - c2.getB());
@@ -70,29 +76,32 @@ double Color::colorCompare(Color const& c1, Color const& c2)
     double lumadiff = luma1-luma2;
     double diffR = (r1-r2)/255.0, diffG = (g1-g2)/255.0, diffB = (b1-b2)/255.0;
     return (diffR*diffR*0.299 + diffG*diffG*0.587 + diffB*diffB*0.114)*0.75
-	+ lumadiff*lumadiff;
+           + lumadiff*lumadiff;
 }
 
 
-Color Color::mix(Color const& c1, Color const& c2, float amount){
-    /* 
+Color Color::mix(Color const& c1, Color const& c2, float amount)
+{
+    /*
        assert(amount <= 1);
        assert(amount >= 0);
     */
 
     Color result(round(c1.getR()*amount + c2.getR()*(1-amount)),
-		 round(c1.getG()*amount + c2.getG()*(1-amount)),
-		 round(c1.getB()*amount + c2.getB()*(1-amount)));
+                 round(c1.getG()*amount + c2.getG()*(1-amount)),
+                 round(c1.getB()*amount + c2.getB()*(1-amount)));
     return result;
 }
-  
-Triplet Color::toTriplet() {
+
+Triplet Color::toTriplet()
+{
     return Triplet(this->r, this->g, this->b);
 }
 
-std::ostream& operator<<(std::ostream &strm, const Color &c) {
-    return strm << "Color(" 
-		<< (int) c.getR() << ","
-		<< (int) c.getG() << "," 
-		<< (int) c.getB() << ")";
+std::ostream& operator<<(std::ostream &strm, const Color &c)
+{
+    return strm << "Color("
+           << (int) c.getR() << ","
+           << (int) c.getG() << ","
+           << (int) c.getB() << ")";
 }

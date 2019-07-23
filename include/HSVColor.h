@@ -4,14 +4,16 @@
 #include "Color.h"
 
 
-typedef struct {
+typedef struct
+{
     double h;       // angle in degrees
     double s;       // percent
     double v;       // percent
 } hsvComponents;
 
-class HSVColor {
- public :
+class HSVColor
+{
+public :
 
     /**  The HSV components */
     hsvComponents hsv;
