@@ -3,6 +3,21 @@
 
 #include "Color.h"
 
+#ifndef ABS
+#define ABS(A)    ((A) < 0 ? (-(A)) : (A))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)  ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b)  ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef TRIM
+#define TRIM(x,a,b) (FA_MIN(FA_MAX(x,a),b))
+#endif
 
 typedef struct
 {

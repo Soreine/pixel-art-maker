@@ -1,10 +1,9 @@
 Archive
 Results
-*.png
 *.jpg
 obj
-palette
-dither
+pixam-palette
+pixam-dither
 
 # CIMg
 CImg-1.5.7/

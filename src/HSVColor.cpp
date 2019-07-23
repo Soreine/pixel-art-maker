@@ -17,11 +17,9 @@ hsvComponents rgb2hsv(rgb in)
     hsvComponents         out;
     double      min, max, delta;
 
-    min = in.r < in.g ? in.r : in.g;
-    min = min  < in.b ? min  : in.b;
+    min = MIN(MIN(in.r, in.g), in.b);
 
-    max = in.r > in.g ? in.r : in.g;
-    max = max  > in.b ? max  : in.b;
+    max = MAX(MAX(in.r, in.g), in.b);
 
     out.v = max;                                // v
     delta = max - min;
@@ -51,7 +49,6 @@ hsvComponents rgb2hsv(rgb in)
 
     return out;
 }
-
 
 rgb hsv2rgb(hsvComponents in)
 {
@@ -112,7 +109,6 @@ rgb hsv2rgb(hsvComponents in)
     }
     return out;
 }
-
 
 /** Create a non initialized HSVColor object */
 HSVColor::HSVColor()

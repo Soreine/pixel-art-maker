@@ -20,17 +20,17 @@ void usage(const char * progname)
 {
     cerr
             << "Usage: " << endl
-            << "\t" << progname << " imageFile paletteFile patternFile [outputFile]" << endl
+            << "\t" << progname << " imageFile.png paletteFile.png patternFile.png [outputFile.png]" << endl
             << endl
             << "This program loads a palette image and an image and then try to" << endl
             << "display this image using the computed palette and a given" << endl
             << "threshold matrix." << endl
             << endl
             << "Parameters:" << endl
-            << "\timageFile: path to the image file to dither" << endl
-            << "\tpaletteFile: path to the palette file." << endl
-            << "\tpatternFile: path to the image to use as a dithering pattern" << endl
-            << "\toutputFile: result image will be saved under this name" << endl
+            << "\timageFile.png: path to the image file to dither" << endl
+            << "\tpaletteFile.png: path to the palette file." << endl
+            << "\tpatternFile.png: path to the image to use as a dithering pattern" << endl
+            << "\toutputFile.png: result image will be saved under this name" << endl
             << "\t            (default to <imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png)" << endl
             << endl
             << "Result:" << endl
@@ -416,11 +416,11 @@ int main(int argc, char* argv[])
 
     result = ditherNearest(image, paletteImage, thresholdImage);
 
-    // Display the result
+    /* Display the result
     CImgDisplay result_disp(result, "Result");
-
     cout << "Enter to finish" << endl;
     cin.ignore();
+    */
 
     // Save dithered image
     string outputFilename;
@@ -440,10 +440,14 @@ int main(int argc, char* argv[])
 
         fs::path patternpathname(fileThreshold);
         string patternbasename = patternpathname.stem().string();
-
-        outputFilename = dirname + "/"
-                         + basename + "-dithered-by-" + palettebasename
-                         + "-with-" + patternbasename + ".png";
+        if (dirname.length() == 0)
+        {
+            outputFilename = basename + "-dithered-by-" + palettebasename + "-with-" + patternbasename + ".png";
+        }
+        else
+        {
+            outputFilename = dirname + "/" + basename + "-dithered-by-" + palettebasename + "-with-" + patternbasename + ".png";
+        }
     }
 
     result.save(outputFilename.c_str());

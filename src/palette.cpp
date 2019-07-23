@@ -20,7 +20,7 @@ void usage(const char * progname)
 {
     cerr
             << "Usage: " << endl
-            << "\t" << progname << " imageFile colorsCount [outputFile]" << endl
+            << "\t" << progname << " imageFile.png colorsCount [outputFile.png]" << endl
             << endl
             << "This program determines the best color palette to use to display an" << endl
             << "image, using the K-mean algorithm." << endl
@@ -323,11 +323,14 @@ int main(int argc, char* argv[])
         fs::path pathname(file);
         string dirname  = pathname.parent_path().string();
         string basename = pathname.stem().string();
-
-        outputFile =
-            dirname + "/"
-            + "palette-" + ss.str() + "-"
-            + basename + ".png";
+        if (dirname.length() == 0)
+        {
+            outputFile = "palette-" + ss.str() + "-" + basename + ".png";
+        }
+        else
+        {
+            outputFile = dirname + "/" + "palette-" + ss.str() + "-" + basename + ".png";
+        }
     }
     // Check that K is between 2 and 65536
     if(K < 2 || K > 65536)
