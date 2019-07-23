@@ -56,7 +56,7 @@ Assuming you are located at the root of the repo, you can generate a
 16 colors palette for the example picture `paraglider.png` and dither
 it with an 8x8 Bayer pattern like this:
 
-	$ ./palette picture.png 16 palette.png
+	$ ./pixam-palette picture.png 16 palette.png
 
 Now you have an optimized 16 colors palette:
 
@@ -64,7 +64,7 @@ Now you have an optimized 16 colors palette:
 
 You can now dither this same picture, using for example the `bayer8.png` pattern:
 
-	$ ./dither picture.png palette.png examples/bayer8.png dithered-picture.png
+	$ ./pixam-dither picture.png palette.png patterns/pattern-bayer8.png dithered-picture.png
 
 The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
 
@@ -80,26 +80,26 @@ palette argument for the `dither` command, this is not mandatory.
 
 ### Palette generation
 
-Syntax: `./palette imageFile colorsCount [outputFile]`
+Syntax: `./pixam-palette image.png colorsCount [output.png]`
 
 Parameters:
 
-* `imageFile`: path to the image file that needs an optimized palette
+* `image.png`: path to the image file that needs an optimized palette
 * `colorsCount`: desired number of colors in the palette
-* (optional) `outputFile`: name of the output palette image file
-  (default to `palette-<colorsCount>-<imageFile>.png`)
+* (optional) `output.png`: name of the output palette image file
+  (default to `palette-<colorsCount>-<image>.png`)
 
 ### Dithering
 
-Syntax: `./dither  imageFile paletteFile patternFile [outputFile]`
+Syntax: `./pixam-dither image.png palette.png pattern.png [output.png]`
 
 Parameters:
 
-* `imageFile`: path to the image file to dither
-* `paletteFile`: path to the palette to use
-* `patternFile`: path to the image used as a dithering pattern
-* (optional) `outputFile`: result image will be saved under this name
-  (default to `<imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png`)
+* `image.png`: path to the image file to dither
+* `palette.png`: path to the palette to use
+* `pattern.png`: path to the image used as a dithering pattern
+* (optional) `output.png`: result image will be saved under this name
+  (default to `<image>-dithered-by-<pattern>-with-<palette>.png`)
 
 ## How does it actually work ?
 
@@ -197,8 +197,8 @@ $ sudo apt-get install libboost-filesystem-dev cimg-dev
 Then you can compile the project using the provided `Makefile`:
 
 ```
-$ make dither
-$ make palette
+$ make
 ```
 
-
+----  
+https://github.com/Soreine/pixel-art-maker

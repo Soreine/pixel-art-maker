@@ -3,15 +3,32 @@
 
 #include "Color.h"
 
+#ifndef ABS
+#define ABS(A)    ((A) < 0 ? (-(A)) : (A))
+#endif
 
-typedef struct {
+#ifndef MIN
+#define MIN(a,b)  ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b)  ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef TRIM
+#define TRIM(x,a,b) (FA_MIN(FA_MAX(x,a),b))
+#endif
+
+typedef struct
+{
     double h;       // angle in degrees
     double s;       // percent
     double v;       // percent
 } hsvComponents;
 
-class HSVColor {
- public :
+class HSVColor
+{
+public :
 
     /**  The HSV components */
     hsvComponents hsv;

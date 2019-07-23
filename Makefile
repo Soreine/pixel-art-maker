@@ -1,3 +1,4 @@
+TARGETS = pixam-palette pixam-dither
 
 # sources
 
@@ -24,10 +25,6 @@ ALL_OBJ = $(COMMON_OBJ) $(PALETTE_OBJ) $(DITHER_OBJ)
 
 ALL_DEPS = $(ALL_OBJ:%.o=%.d)
 
-# misc.
-
-TARGETS = palette dither
-
 CPPFLAGS = \
 	 -g -Wall -W -ansi -pedantic \
 	 -Dcimg_use_vt100 -Dcimg_use_png \
@@ -40,20 +37,20 @@ LDFLAGS = \
 
 # general targets
 
-all: $(TARGET)
+all: $(TARGETS)
 
 clean:
-	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ)
+	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) $(TARGETS)
 
 dist_clean: clean
 	rm -fr $(TARGET)
 
 # specific targets
 
-palette: $(PALETTE_OBJ) $(COMMON_OBJ)
+pixam-palette: $(PALETTE_OBJ) $(COMMON_OBJ)
 	g++ -o $@ $(PALETTE_OBJ) $(COMMON_OBJ) $(LDFLAGS)
 
-dither: $(DITHER_OBJ) $(COMMON_OBJ)
+pixam-dither: $(DITHER_OBJ) $(COMMON_OBJ)
 	g++ -o $@ $(DITHER_OBJ) $(COMMON_OBJ) $(LDFLAGS)
 
 # include dependencies (if they exist)
