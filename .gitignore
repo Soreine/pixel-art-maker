@@ -1,6 +1,7 @@
 Archive
 Results
-*.jpg
+#*.png
+#*.jpg
 obj
 pixam-palette
 pixam-dither

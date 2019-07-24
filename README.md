@@ -2,7 +2,7 @@
 
 Generate palettes and dither any image with personal patterns.
 
-![Example](readme/process.png)
+![Example](doc/images/process.png)
 
 ## Index
 - [What is it ?](#what-is-it-)
@@ -50,7 +50,7 @@ instructions in the *Build* section.
 
 Original picture:
 
-![Original Picture](readme/paraglider.png)
+![Original Picture](doc/images/paraglider.png)
 
 Assuming you are located at the root of the repo, you can generate a
 16 colors palette for the example picture `paraglider.png` and dither
@@ -60,7 +60,7 @@ it with an 8x8 Bayer pattern like this:
 
 Now you have an optimized 16 colors palette:
 
-![16 color palette](readme/paraglider-palettex8.png)
+![16 color palette](doc/images/paraglider-palettex8.png)
 
 You can now dither this same picture, using for example the `bayer8.png` pattern:
 
@@ -68,12 +68,12 @@ You can now dither this same picture, using for example the `bayer8.png` pattern
 
 The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
 
-![8x8 Bayer Matrix](readme/zoomBayer8.png)
+![8x8 Bayer Matrix](doc/images/zoomBayer8.png)
 
 
 Result:
 
-![Dithered picture](readme/bayer-dithered-paraglider.png)
+![Dithered picture](doc/images/bayer-dithered-paraglider.png)
 
 Although the output from the `palette` command can be used as the
 palette argument for the `dither` command, this is not mandatory.
@@ -153,14 +153,14 @@ distance between these colors. Let's say that C stands at 30% between
 C1 and C2, that is, the distance between C1 and C equals 30% of the
 distance between C1 and C plus the distance between C and C2.
 
-![Intermediate color](readme/between.png)
+![Intermediate color](doc/images/between.png)
 
 Now it's simple, if the corresponding pattern pixel is 30% or less
 bright, then choose C1, else choose C2. Applying a 30% threshold to
 the pattern image will show as black all the pixels that will choose
 C1 and as white all the pixels that will choose C2.
 
-![Threshold](readme/threshold.png)
+![Threshold](doc/images/threshold.png)
 
 ### Making a custom pattern
 
