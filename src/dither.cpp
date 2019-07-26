@@ -20,18 +20,18 @@ void usage(const char * progname)
 {
     cerr
             << "Usage: " << endl
-            << "\t" << progname << " imageFile.png paletteFile.png patternFile.png [outputFile.png]" << endl
+            << "\t" << progname << " image.png palette.png pattern.png [output.png]" << endl
             << endl
             << "This program loads a palette image and an image and then try to" << endl
             << "display this image using the computed palette and a given" << endl
             << "threshold matrix." << endl
             << endl
             << "Parameters:" << endl
-            << "\timageFile.png: path to the image file to dither" << endl
-            << "\tpaletteFile.png: path to the palette file." << endl
-            << "\tpatternFile.png: path to the image to use as a dithering pattern" << endl
-            << "\toutputFile.png: result image will be saved under this name" << endl
-            << "\t            (default to <imageFile>-dithered-by-<patternFile>-with-<paletteFile>.png)" << endl
+            << "\timage.png: path to the image file to dither (support CImg, recommends PNG)" << endl
+            << "\tpalette.png: path to the palette file." << endl
+            << "\tpattern.png: path to the image to use as a dithering pattern" << endl
+            << "\toutput.png: result image will be saved under this name" << endl
+            << "\t\t(default to '<image>-dithered-by-<pattern>-with-<palette>.png')" << endl
             << endl
             << "Result:" << endl
             << "\tA dithered image will be saved." << endl;

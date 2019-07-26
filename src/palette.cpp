@@ -20,16 +20,16 @@ void usage(const char * progname)
 {
     cerr
             << "Usage: " << endl
-            << "\t" << progname << " imageFile.png colorsCount [outputFile.png]" << endl
+            << "\t" << progname << " image.png colorsCount [output.png]" << endl
             << endl
             << "This program determines the best color palette to use to display an" << endl
             << "image, using the K-mean algorithm." << endl
             << endl
             << "Parameters:" << endl
-            << "\timageFile: path to the image file." << endl
+            << "\timage.png: path to the image file (support CImg, recommends PNG)." << endl
             << "\tcolorsCount: desired number of colors in the palette used" << endl
-            << "\toutputFile: name for the output palette image file" << endl
-            << "\t(default outputFile 'palette-colorCount-<imageFile>.png')" << endl
+            << "\toutput.png: name for the output palette image file" << endl
+            << "\t\t(default to 'palette-<colorCount>-<image>.png')" << endl
             << endl
             << "Result:" << endl
             << "\tAn image containing the palette's colors will be saved." << endl;

@@ -1,0 +1,61 @@
+.TH PIXAM 1 "26 Jul 2019" "0.0.83" "User Manual"
+
+.SH NAME
+pixam-dither, pixam-palette \- Pixel Art Maker
+
+.SH SYNOPSIS
+.B pixam-dither
+.RB image.png
+.RB palette.png
+.RB pattern.png
+[
+.I output.png
+]
+.br
+.B pixam-palette
+.RB image.png
+.RB colorsCount
+[
+.I output.png
+]
+
+.SH DESCRIPTION
+.I pixam-dither
+and
+.I pixam-palette
+generate palettes and dither any image with personal patterns.
+
+.SH OPTIONS
+.TP
+.B image.png
+path to the image file to dither (support CImg, recommends PNG)
+.TP
+.B palette.png
+path to the palette file.
+.TP
+.B pattern.png
+path to the image to use as a dithering pattern
+.TP
+.B colorsCount
+desired number of colors in the palette used
+.TP
+.I output.png
+result image
+.br
+default for
+.I pixam-dither
+:
+.br
+<image>-dithered-by-<pattern>-with-<palette>.png
+.br
+default for
+.I pixam-palette
+:
+.br
+palette-<colorCount>-<image>.png
+
+.SH "SEE ALSO"
+pngnq(1), pngquant(1), gm(1)
+
+.SH COPYRIGHT
+Copyright \(co 2014 Nicolas Gaborit <hello@soreine.dev>
