@@ -1,11 +1,13 @@
-TARGETS = pixam-palette pixam-dither
+PNAME = pixam
+TARGETS = $(PNAME)-palette $(PNAME)-dither
 
 # sources
 
 COMMON_SRC = src/ColorHist.cpp \
 	     src/Color.cpp \
 	     src/HSVColor.cpp \
-	     src/Triplet.cpp
+	     src/Triplet.cpp \
+	     src/pixam.cpp
 
 COMMON_INCLUDE = $(COMMON_SRC:src/%.cpp=include/%.h)
 
@@ -35,23 +37,24 @@ LDFLAGS = \
 	-L/usr/X11R6/lib \
 	-lpthread -lpng -lz -lX11 -lm 
 
+STRIP = -s
 # general targets
 
 all: $(TARGETS)
 
 clean:
-	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) $(TARGETS)
+	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) $(TARGETS) obj
 
 dist_clean: clean
-	rm -fr $(TARGET)
+	rm -fr $(TARGETS)
 
 # specific targets
 
-pixam-palette: $(PALETTE_OBJ) $(COMMON_OBJ)
-	g++ -o $@ $(PALETTE_OBJ) $(COMMON_OBJ) $(LDFLAGS)
+$(PNAME)-palette: $(COMMON_OBJ) $(PALETTE_OBJ)
+	g++ -o $@ $^ $(LDFLAGS) $(STRIP)
 
-pixam-dither: $(DITHER_OBJ) $(COMMON_OBJ)
-	g++ -o $@ $(DITHER_OBJ) $(COMMON_OBJ) $(LDFLAGS)
+$(PNAME)-dither: $(COMMON_OBJ) $(DITHER_OBJ)
+	g++ -o $@ $^ $(LDFLAGS) $(STRIP)
 
 # include dependencies (if they exist)
 
