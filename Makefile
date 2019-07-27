@@ -1,27 +1,23 @@
 PNAME = pixam
-TARGETS = $(PNAME)-palette $(PNAME)-dither
+TARGETS = $(PNAME)
 
 # sources
 
 COMMON_SRC = src/ColorHist.cpp \
 	     src/Color.cpp \
 	     src/HSVColor.cpp \
-	     src/Triplet.cpp \
-	     src/pixam.cpp
+	     src/Triplet.cpp
 
 COMMON_INCLUDE = $(COMMON_SRC:src/%.cpp=include/%.h)
 
-PALETTE_SRC = src/palette.cpp
-
-DITHER_SRC = src/dither.cpp
+CLI_SRC = src/pixam.cpp src/pixam-cli.cpp
 
 # object files
 
 COMMON_OBJ = $(COMMON_SRC:src/%.cpp=obj/%.o)
-PALETTE_OBJ = $(PALETTE_SRC:src/%.cpp=obj/%.o)
-DITHER_OBJ = $(DITHER_SRC:src/%.cpp=obj/%.o)
+CLI_OBJ = $(CLI_SRC:src/%.cpp=obj/%.o)
 
-ALL_OBJ = $(COMMON_OBJ) $(PALETTE_OBJ) $(DITHER_OBJ)
+ALL_OBJ = $(COMMON_OBJ) $(CLI_OBJ)
 
 # dependencies
 
@@ -43,17 +39,14 @@ STRIP = -s
 all: $(TARGETS)
 
 clean:
-	rm -rf $(PALETTE_OBJ) $(DITHER_OBJ) $(COMMON_OBJ) $(TARGETS) obj
+	rm -rf $(ALL_OBJ) $(TARGETS) obj
 
 dist_clean: clean
 	rm -fr $(TARGETS)
 
 # specific targets
 
-$(PNAME)-palette: $(COMMON_OBJ) $(PALETTE_OBJ)
-	g++ -o $@ $^ $(LDFLAGS) $(STRIP)
-
-$(PNAME)-dither: $(COMMON_OBJ) $(DITHER_OBJ)
+$(PNAME): $(ALL_OBJ)
 	g++ -o $@ $^ $(LDFLAGS) $(STRIP)
 
 # include dependencies (if they exist)

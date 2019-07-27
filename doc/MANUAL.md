@@ -54,7 +54,7 @@ Assuming you are located at the root of the repo, you can generate a
 16 colors palette for the example picture `paraglider.png` and dither
 it with an 8x8 Bayer pattern like this:
 
-	$ ./pixam-palette picture.png 16 palette.png
+	$ ./pixam palette picture.png 16 palette.png
 
 Now you have an optimized 16 colors palette:
 
@@ -62,7 +62,7 @@ Now you have an optimized 16 colors palette:
 
 You can now dither this same picture, using for example the `pattern-bayer8.png` pattern:
 
-	$ ./pixam-dither picture.png palette.png patterns/pattern-bayer8.png dithered-picture.png
+	$ ./pixam dither picture.png palette.png patterns/pattern-bayer8.png dithered-picture.png
 
 The 8x8 Bayer threshold matrix looks like this (zoom 8:1) :
 
@@ -78,7 +78,7 @@ palette argument for the `dither` command, this is not mandatory.
 
 ### Palette generation
 
-Syntax: `./pixam-palette image.png colorsCount [output.png]`
+Syntax: `./pixam palette image.png colorsCount [output.png]`
 
 Parameters:
 
@@ -89,7 +89,7 @@ Parameters:
 
 ### Dithering
 
-Syntax: `./pixam-dither image.png palette.png pattern.png [output.png]`
+Syntax: `./pixam dither image.png palette.png pattern.png [output.png]`
 
 Parameters:
 

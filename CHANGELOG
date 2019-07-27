@@ -1,5 +1,9 @@
 Pixel Art Maker
 
+0.0.87 (2019-07-27) <zvezdochiot>
+
+    * command interface merged
+
 0.0.86 (2019-07-27) <zvezdochiot>
 
     * fix Makefile for 0.0.85

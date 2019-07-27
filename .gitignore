@@ -3,8 +3,7 @@ Results
 #*.png
 #*.jpg
 obj
-pixam-palette
-pixam-dither
+pixam
 
 # CIMg
 CImg-1.5.7/
