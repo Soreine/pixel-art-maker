@@ -17,7 +17,7 @@ double bayer8x8(int p)
     long result = (((p & 4) >> 2) | ((q & 4) >> 1)
                    | ((p & 2) << 1) | ((q & 2) << 2)
                    | ((p & 1) << 4) | ((q & 1) << 5));
-    return (double) result / 64;
+    return (double) result / 64.0;
 }
 
 inline Color getColor(int const x, int const y, CImg<unsigned char> const& image)
@@ -91,19 +91,20 @@ void parsePalette(CImg<unsigned char> const& paletteImage,
     // A color histogram to check that we take each unique color only
     // once
     ColorHist ch;
-
     Color c;
+    // The index in loops
+    int y, x;
 
     // Initialize the number of colors
     colorCount = 0;
 
     // Init the color array
     palette = new Color[paletteImage.height()*paletteImage.width()];
-    cout << paletteImage.height()*paletteImage.width() << endl;
+    cout << "Palette count : " << paletteImage.height()*paletteImage.width() << endl;
     // Parse the palette image and grab all the colors !
-    for(int y = 0; y < paletteImage.height(); y++)
+    for(y = 0; y < paletteImage.height(); y++)
     {
-        for(int x = 0; x < paletteImage.width(); x++)
+        for(x = 0; x < paletteImage.width(); x++)
         {
             // If not transparent
             if(paletteImage(x, y, 3) > 0)
@@ -134,32 +135,30 @@ void parsePalette(CImg<unsigned char> const& paletteImage,
 void parseThreshold(CImg<unsigned char> const& thresholdImage, double*& threshold,
                     int& width, int& height, double& min, double& max)
 {
-    // A threshold value
-    double value;
-
     // Set the width and height
     width = thresholdImage.width();
     height = thresholdImage.height();
+    // The index in loops
+    int y, x, k;
+    // A threshold value
+    double value;
 
     // Init the threshold array
     threshold = new double[width*height];
 
     // Parse the threshold image
-    for(int y = 0; y < height; y++)
+    k = 0;
+    for(y = 0; y < height; y++)
     {
-        for(int x = 0; x < width; x++)
+        for(x = 0; x < width; x++)
         {
             // Sum the threshold values
             value = (double) (thresholdImage(x,y,0) + thresholdImage(x,y,1) + thresholdImage(x,y,2));
             // Average and constrain to [0,1]
             value = value/(3*255);
             // Put in the map
-            threshold[x + width*y] = value;
-            // Update the min/max
-            if(value < min)
-                min = value;
-            if(value > max)
-                max = value;
+            threshold[k] = value;
+            k++;
         }
     }
 
@@ -167,16 +166,16 @@ void parseThreshold(CImg<unsigned char> const& thresholdImage, double*& threshol
     min = threshold[0];
     max = min;
     // Find the max and min
-    for(int y = 0; y < height; y++)
+    k = 0;
+    for(y = 0; y < height; y++)
     {
-        for(int x = 0; x < width; x++)
+        for(x = 0; x < width; x++)
         {
-            value = threshold[x + width*y];
+            value = threshold[k];
             // Update the min/max
-            if(value < min)
-                min = value;
-            if(value > max)
-                max = value;
+            min = (value < min) ? value : min;
+            max = (value > max) ? value : max;
+            k++;
         }
     }
 
@@ -204,14 +203,16 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
     Color * palette;
     // The number of colors in the palette
     int colorCount;
+    // The index in loops
+    int y, x, k;
 
     // Grab the colors from the palette and set the colorCount
     parsePalette(paletteImage, palette, colorCount);
 
     // For each pixel in the image, find the best color
-    for (int y = 0 ; y < image.height() ; y++)
+    for (y = 0; y < image.height(); y++)
     {
-        for (int x = 0 ; x < image.width() ; x++)
+        for (x = 0; x < image.width(); x++)
         {
             // The color to approximate
             c = getColor(x, y, image);
@@ -220,7 +221,7 @@ CImg<unsigned char>  nodither(CImg<unsigned char> const& image,
             nearestDist = 16777216; // (256*256*256) = maximum value
             // of distance2(color1, color2)
             // Find the closest color in the palette
-            for (int k = 0 ; k < colorCount ; k++ )
+            for (k = 0; k < colorCount; k++)
             {
                 dist = Color::distance2(c, palette[k]);
                 if (dist < nearestDist)
@@ -269,15 +270,19 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
     HSVColor * paletteHSV;
     // The number of colors in the palette
     int colorCount;
+    // The index in loops
+    int y, x, k;
 
     // The threshold map (values between 0 and 1)
     double * threshold;
     // The width and height of the threshold map
-    int tWidth;
-    int tHeight;
+    int tWidth, tHeight;
     // The min and max values in the threshold map
-    double tMin;
-    double tMax;
+    double tMin, tMax;
+    // The corresponding threshold value
+    double thresholdValue, value;
+    // The index picking one of the two best color
+    int chosen;
 
     // Parse the threshold map
     parseThreshold(thresholdImage, threshold, tWidth, tHeight, tMin, tMax);
@@ -288,14 +293,14 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
     // Initialize the paletteHSV
     paletteHSV = new HSVColor[colorCount];
     // Fill it
-    for(int k = 0; k < colorCount; k++)
+    for(k = 0; k < colorCount; k++)
     {
         paletteHSV[k] = HSVColor(palette[k]);
     }
     // For each pixel in the image, find the best two colors
-    for (int y = 0 ; y < image.height() ; y++)
+    for (y = 0; y < image.height(); y++)
     {
-        for (int x = 0 ; x < image.width() ; x++)
+        for (x = 0; x < image.width(); x++)
         {
             // The color to approximate
             c = getColor(x, y, image);
@@ -304,9 +309,9 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
             nearest2 = 0;
             nearestDist1 = 16777216; // (256*256*256) = maximum value
             // of distance2(color1, color2)
-            nearestDist2 = nearestDist2;
+            nearestDist2 = nearestDist1;
             // Find the two closest color in the palette
-            for (int k = 0 ; k < colorCount ; k++ )
+            for (k = 0; k < colorCount; k++ )
             {
                 // Calculate distance to this color
                 dist = Color::distance2(c, palette[k]);
@@ -334,7 +339,7 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
             // nearest1 is the first nearest color, nearest2 is the second one
 
             // The corresponding threshold value
-            double thresholdValue = threshold[(x % tWidth) + tWidth*(y % tHeight)];
+            thresholdValue = threshold[(x % tWidth) + tWidth*(y % tHeight)];
             // Reorder the two colors if needed (for continuity when
             // going closer from the second one)
             if(HSVcompare(paletteHSV[nearest1], paletteHSV[nearest2]) > 0)
@@ -349,9 +354,8 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const& image,
                 nearestDist1 = nearestDist1 ^ nearestDist2;
             }
             // Our color is located between two colors :
-            double value = (double) nearestDist1 / (double) (nearestDist1 + nearestDist2);
+            value = (double) nearestDist1 / (double) (nearestDist1 + nearestDist2);
             // Pick one of the two best color, regarding to the threshold map
-            int chosen;
             if(value < thresholdValue)
                 chosen = nearest1;
             else
@@ -401,6 +405,13 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     long * clusterWeight = new long[K];
     // Temporary weight
     long weight;
+    // The index in loops
+    int y, x, i;
+    // The list of all unique colors
+    list<point>::iterator iterator;
+    unsigned int step;
+    // The palette image size
+    int height, width;
 
     // The centers of the clusters in the k-mean algorithm. At the end:
     // the computed color palette
@@ -410,9 +421,9 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 
     // Initialize the color histogram and the point list
 
-    for (int y = 0 ; y < image.height() ; y++)
+    for (y = 0; y < image.height(); y++)
     {
-        for (int x = 0 ; x < image.width() ; x++)   // For each pixel
+        for (x = 0; x < image.width(); x++)   // For each pixel
         {
             //
             p.color = getColor(x, y, image);
@@ -433,36 +444,32 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     }
 
     // Initialize the clusters centers (kmeans) with colors from the image
+    // Select K colors evenly spaced in the list of all unique colors
+    iterator = pointList.begin();
+    step = pointList.size()/(unsigned int) K;
+    for (i = 0; i < K; i++)
     {
-        // Select K colors evenly spaced in the list of all unique colors
-        list<point>::iterator iterator = pointList.begin();
-        unsigned int step = pointList.size()/(unsigned int) K;
-        for (int i = 0; i < K; i++)
-        {
-            // Initialize the kmean with this color
-            c = (*iterator).color;
-            kmean[i] = c;
-            // Next step
-            std::advance(iterator, step);
-        }
+        // Initialize the kmean with this color
+        c = (*iterator).color;
+        kmean[i] = c;
+        // Next step
+        std::advance(iterator, step);
     }
 
     ////////////////// K-Mean Algorithm ////////////////////////
-
 
     // While the algorithm modifies the kmeans
     while(changed)
     {
         // Initialize the next k-means array
-        for (int i = 0 ; i < K ; i++ )
+        for (i = 0; i < K; i++)
         {
             nextKMean[i] = Triplet(0,0,0);
             clusterWeight[i] = 0;
         }
 
         // Update the clusters by re-associating the points to the closest kmean
-        for (list<point>::iterator iterator = pointList.begin() ;
-                iterator != pointList.end() ; iterator++)
+        for (iterator = pointList.begin(); iterator != pointList.end(); iterator++)
         {
             // Get the color being treated
             c = (*iterator).color;
@@ -470,9 +477,9 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
             // Initialize the nearest kmean as the first of the list
             nearest = 0;
             // Initialize with the maximum distance
-            nearestDist = 4096; // sqrt(256*256*256)
+            nearestDist = 16777216; // (256*256*256) = maximum value
             // Find the closest kmean
-            for (int i = 0 ; i < K ; i++ )
+            for (i = 0; i < K; i++)
             {
                 // Distance from the i-th kmean
                 dist = Color::distance2(c, kmean[i]);
@@ -509,7 +516,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
 
         changed = false;
         // For each kmean
-        for (int i = 0 ; i < K ; i++ )
+        for (i = 0; i < K; i++)
         {
             // If the cluster is not empty
             if(clusterWeight[i] != 0)
@@ -532,8 +539,8 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     cout << endl;
 
     // Determine the palette image size (at most 256 pixels wide)
-    int height = K/256 + 1;
-    int width = K<255?K:256; // minimum between K and 256
+    height = K / 256 + 1;
+    width = (K < 255) ? K : 256; // minimum between K and 256
 
     // Create the image that will contain the palette colors, the
     // fourth channel is for transparency
@@ -544,7 +551,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
         // Create an HSV palette
         HSVColor * hsvPalette = new HSVColor[K];
         // Fill it with the RGB colors from the palette
-        for(int i = 0; i < K; i++)
+        for(i = 0; i < K; i++)
         {
             hsvPalette[i] = HSVColor(kmean[i]);
         }
@@ -552,7 +559,7 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
         qsort(hsvPalette, K, sizeof(HSVColor), HSVcompareL);
 
         // Replace the RGB palette with the ordered values
-        for(int i = 0; i < K; i++)
+        for(i = 0; i < K; i++)
         {
             kmean[i] = hsvPalette[i].toRGBColor();
         }
@@ -561,21 +568,22 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     }
 
     // Generate the palette image
-    for (int n = 0 ; n < K ; n++ )
+    for (i = 0; i < K; i++)
     {
         // Get the palette color
-        c = kmean[n];
+        c = kmean[i];
         // Create a pixel of the color c in the palette image
         // Line
-        int y = n/palette.width();
+        y = i/palette.width();
         // Column
-        int x = n%palette.width();
+        x = i%palette.width();
         // Fill the RGB channels
         palette(x, y, 0) = c.getR();
         palette(x, y, 1) = c.getG();
         palette(x, y, 2) = c.getB();
         palette(x, y, 3) = 255; // Opacity 100%
     }
+    cout << "Palette count : " << K << endl;
 
     // Free memory
     delete[] nextKMean;
