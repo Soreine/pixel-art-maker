@@ -1,5 +1,13 @@
 Pixel Art Maker
 
+0.0.89 (2019-07-30) <zvezdochiot>
+
+    * added undither (linear OLS)
+
+0.0.88 (2019-07-29) <zvezdochiot>
+
+    * code revision
+
 0.0.87 (2019-07-27) <zvezdochiot>
 
     * command interface merged

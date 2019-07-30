@@ -22,5 +22,11 @@ You can now dither this same picture, using for example the `pattern-knut-odith.
 
 ![Lena D.E.Knut odith](examples/lena-knut-odith.png)
 
+You can now undither dithered picture, using for example the `pattern-bubble8.png` pattern:
+
+	$ ./pixam undither lena-bubble.png pattern-bubble8.png lena-undither.jpg
+
+![Lena undither](examples/lena-undither.jpg)
+
 ----  
 https://github.com/Soreine/pixel-art-maker

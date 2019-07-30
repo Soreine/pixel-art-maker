@@ -7,7 +7,7 @@ void usage(const char * progname)
             << "Usage: " << endl
             << "\t" << progname << " command parameters" << endl
             << endl
-            << "Command: dither | palette" << endl
+            << "Command: palette | dither | undither" << endl
             << endl
             << "Command palette:" << endl
             << endl
@@ -41,7 +41,23 @@ void usage(const char * progname)
             << "\t\t(default to '<image>-dithered-by-<pattern>-with-<palette>.png')" << endl
             << endl
             << "Result:" << endl
-            << "\tA dithered image will be saved." << endl;
+            << "\tA dithered image will be saved." << endl
+            << endl
+            << "Command undither:" << endl
+            << endl
+            << "\t" << progname << " undither ditheredimage.png pattern.png [output.png]" << endl
+            << endl
+            << "This program loads a dithered image and tries to isolate a pattern" << endl
+            << "using linear OLS." << endl
+            << endl
+            << "Parameters:" << endl
+            << "\tditheredimage.png: path to the image file from dither (support CImg, recommends PNG)" << endl
+            << "\tpattern.png: path to the image to use as a dithering pattern" << endl
+            << "\toutput.png: result image will be saved under this name" << endl
+            << "\t\t(default to '<image>-undithered-by-<pattern>.png')" << endl
+            << endl
+            << "Result:" << endl
+            << "\tA undithered image will be saved." << endl;
     exit(1);
 }
 
@@ -185,6 +201,59 @@ int main(int argc, char* argv[])
         // Save the palette image
         palette.save(outputFile.c_str());
         cout << "Saved to " << outputFile << endl;
+    } else if (strcmp("undither", tcommand) == 0) {
+        // The image file path
+        char * fileImage;
+        // The threshold pattern image file path
+        char * fileThreshold;
+
+        // If not enough arguments were given when called
+        if (argc < 4 || argc > 5)
+        {
+            // Display an error and exit
+            usage(argv[0]);
+        }
+
+        fileImage = argv[2];
+        fileThreshold = argv[3];
+
+        // The image
+        CImg<unsigned char>  image(fileImage);
+        // The threshold image
+        CImg<unsigned char>  thresholdImage(fileThreshold);
+
+        // The dithered result image
+        CImg<unsigned char>  result(fileThreshold);
+
+        // Save dithered image
+        string outputFilename;
+        if(argc > 4)
+        {
+            outputFilename = string(argv[4]);
+        }
+        else
+        {
+            // Create a generic file name
+            fs::path pathname(fileImage);
+            string dirname  = pathname.parent_path().string();
+            string basename = pathname.stem().string();
+
+            fs::path patternpathname(fileThreshold);
+            string patternbasename = patternpathname.stem().string();
+            if (dirname.length() == 0)
+            {
+                outputFilename = basename + "-undithered-by-" + patternbasename + ".png";
+            }
+            else
+            {
+                outputFilename = dirname + "/" + basename + "-undithered-by-" + patternbasename + ".png";
+            }
+        }
+
+        result = undither(image, thresholdImage);
+
+        result.save(outputFilename.c_str());
+        cout << "Saved to " << outputFilename << endl;
     } else {
         usage(argv[0]);
     }

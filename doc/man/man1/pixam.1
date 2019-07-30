@@ -1,4 +1,4 @@
-.TH PIXAM 1 "27 Jul 2019" "0.0.87" "User Manual"
+.TH PIXAM 1 "30 Jul 2019" "0.0.89" "User Manual"
 
 .SH NAME
 pixam \- Pixel Art Maker
@@ -8,6 +8,13 @@ pixam \- Pixel Art Maker
 .RB command
 .RB options
 .br
+.B pixam palette
+.RB image.png
+.RB colorsCount
+[
+.I output.png
+]
+.br
 .B pixam dither
 .RB image.png
 .RB palette.png
@@ -16,9 +23,9 @@ pixam \- Pixel Art Maker
 .I output.png
 ]
 .br
-.B pixam palette
+.B pixam undither
 .RB image.png
-.RB colorsCount
+.RB pattern.png
 [
 .I output.png
 ]
@@ -45,16 +52,22 @@ desired number of colors in the palette used
 result image
 .br
 default for
+.I palette
+:
+.br
+palette-<colorCount>-<image>.png
+.br
+default for
 .I dither
 :
 .br
 <image>-dithered-by-<pattern>-with-<palette>.png
 .br
 default for
-.I palette
+.I undither
 :
 .br
-palette-<colorCount>-<image>.png
+<image>-undithered-by-<pattern>.png
 
 .SH "SEE ALSO"
 pngnq(1), pngquant(1), gm(1)
