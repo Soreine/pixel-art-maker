@@ -1,5 +1,9 @@
 Pixel Art Maker
 
+0.0.90 (2019-07-31) <zvezdochiot>
+
+    * added unditherscan (linear OLS)
+
 0.0.89 (2019-07-30) <zvezdochiot>
 
     * added undither (linear OLS)

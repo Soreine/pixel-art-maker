@@ -752,3 +752,182 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
     // Return the result
     return undithered;
 }
+
+CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
+                                 CImg<unsigned char> const& thresholdImage)
+{
+    // The resulting image, reconstructed from the original with the palette's colors
+    CImg<unsigned char> undithered(image.width(), image.height(), 1, 3, 0);
+
+    // Limits
+    int Yend, Xend;
+    // Temporary color variable
+    Color c;
+    // The index in loops
+    int y, x, i, j, ii, ij;
+
+    // The threshold map (values between 0 and 1)
+    double * threshold;
+    // The width and height of the threshold map
+    int tWidth, tHeight, tArea, count, n = 0;
+    // The min and max values in the threshold map
+    double tMin, tMax;
+    // sums OLS
+    double sxy, sx, sy, sxx, t, a, b, ab;
+    // Temporary value
+    double value = 0.0;
+    // Statistics
+    double sv = 0.0, sa = 0.0, sb = 0.0;
+    // Selective colors
+    int ivalue;
+    double scR, scG, scB, scRGB, kR, kG, kB;
+
+    // Parse the threshold map
+    parseThreshold(thresholdImage, threshold, tWidth, tHeight, tMin, tMax);
+    tArea = tWidth * tHeight;
+
+    // Copy image
+    for (y = 0; y < image.height(); y++)
+    {
+        for (x = 0; x < image.width(); x++)
+        {
+            for (i = 0; i < 3; i++)
+            {
+                undithered(x, y, i) = image(x, y, i);
+            }
+        }
+    }
+    // Limits
+    Yend = undithered.height() - thresholdImage.height() + 1;
+    Xend = undithered.width() - thresholdImage.width() + 1;
+    Yend = (Yend > 0) ? Yend : 1;
+    Xend = (Xend > 0) ? Xend : 1;
+    // For each pixel in the image, linear OLS pattern
+    for (y = 0; y < Yend; y++)
+    {
+        for (x = 0; x < Xend; x++)
+        {
+            // linear OLS: c = a * pattern + b
+            sxy = 0.0;
+            sxx = 0.0;
+            sx = 0.0;
+            sy = 0.0;
+            count = 0;
+            for (i = 0; i < tHeight; i++)
+            {
+                if ((y + i) < undithered.height())
+                {
+                    ii = i * tWidth;
+                    for (j = 0; j < tWidth; j++)
+                    {
+                        if ((x + j) < undithered.width())
+                        {
+                            ij = ii + j;
+                            c = getColor(x + j, y + i, undithered);
+                            value = (double) (c.getR() + c.getG() + c.getB());
+                            value /= 765.0;
+                            t = threshold[ij];
+                            sx += t;
+                            sxx += (t * t);
+                            sy += value;
+                            sxy += (value * t);
+                            count++;
+                        }
+                    }
+                }
+            }
+            ab = (double)count * sxx - sx * sx;
+            a = 0.0;
+            b = 0.0;
+            if (ab == 0)
+            {
+                a = 0.0;
+                b = (sy - sx) / (double)count;
+            } else {
+                a = ((double)count * sxy - sx * sy) / ab;
+                b = (sy - a * sx) / (double)count;
+            }
+            // Mean colors
+            sa += a;
+            sb += b;
+            n++;
+            sv = 0;
+            scR = 0;
+            scG = 0;
+            scB = 0;
+            for (i = 0; i < tHeight; i++)
+            {
+                if ((y + i) < undithered.height())
+                {
+                    ii = i * tWidth;
+                    for (j = 0; j < tWidth; j++)
+                    {
+                        if ((x + j) < undithered.width())
+                        {
+                            ij = ii + j;
+                            c = getColor(x + j, y + i, undithered);
+                            value = (double) (c.getR() + c.getG() + c.getB());
+                            value /= 765.0;
+                            t = threshold[ij];
+                            t *= a;
+                            t += b;
+                            value -= t;
+                            value *= value;
+                            value = 1.0 - value;
+                            sv += value;
+                            scR += (double) c.getR() * value;
+                            scG += (double) c.getG() * value;
+                            scB += (double) c.getB() * value;
+                        }
+                    }
+                }
+            }
+            sv = (sv == 0.0) ? (double)tArea : sv;
+            scR /= sv;
+            scG /= sv;
+            scB /= sv;
+            scRGB = scR + scG + scB;
+            scRGB = (scRGB > 0) ? scRGB : 383.0;
+            kR = 765.0 * scR / scRGB;
+            kB = 765.0 * scB / scRGB;
+            kG = 765.0 * scG / scRGB;
+            // Unpattern
+            for (i = 0; i < tHeight; i++)
+            {
+                if ((y + i) < undithered.height())
+                {
+                    ii = i * tWidth;
+                    for (j = 0; j < tWidth; j++)
+                    {
+                        if ((x + j) < undithered.width())
+                        {
+                            ij = ii + j;
+                            c = getColor(x + j, y + i, undithered);
+                            t = threshold[ij];
+                            t *= a;
+                            t += b;
+                            value = (double) c.getR() - t * kR + scR;
+                            ivalue = (int) (value + 0.5);
+                            ivalue = (ivalue < 0) ? 0 : ivalue;
+                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            undithered(x + j, y + i, 0) = ivalue;
+                            value = (double) c.getG() - t * kG + scG;
+                            ivalue = (int) (value + 0.5);
+                            ivalue = (ivalue < 0) ? 0 : ivalue;
+                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            undithered(x + j, y + i, 1) = ivalue;
+                            value = (double) c.getB() - t * kB + scB;
+                            ivalue = (int) (value + 0.5);
+                            ivalue = (ivalue < 0) ? 0 : ivalue;
+                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            undithered(x + j, y + i, 2) = ivalue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cout << "Coeff : a: " << (sa / n) << " b: " << (sb / n) << endl;
+    // Return the result
+    return undithered;
+}

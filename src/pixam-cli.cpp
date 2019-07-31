@@ -7,7 +7,7 @@ void usage(const char * progname)
             << "Usage: " << endl
             << "\t" << progname << " command parameters" << endl
             << endl
-            << "Command: palette | dither | undither" << endl
+            << "Command: palette | dither | undither | unditherscan" << endl
             << endl
             << "Command palette:" << endl
             << endl
@@ -43,9 +43,10 @@ void usage(const char * progname)
             << "Result:" << endl
             << "\tA dithered image will be saved." << endl
             << endl
-            << "Command undither:" << endl
+            << "Command undither | undutherscan :" << endl
             << endl
             << "\t" << progname << " undither ditheredimage.png pattern.png [output.png]" << endl
+            << "\t" << progname << " unditherscan ditheredimage.png pattern.png [output.png]" << endl
             << endl
             << "This program loads a dithered image and tries to isolate a pattern" << endl
             << "using linear OLS." << endl
@@ -201,7 +202,7 @@ int main(int argc, char* argv[])
         // Save the palette image
         palette.save(outputFile.c_str());
         cout << "Saved to " << outputFile << endl;
-    } else if (strcmp("undither", tcommand) == 0) {
+    } else if ((strcmp("undither", tcommand) == 0) || (strcmp("unditherscan", tcommand) == 0)) {
         // The image file path
         char * fileImage;
         // The threshold pattern image file path
@@ -249,8 +250,12 @@ int main(int argc, char* argv[])
                 outputFilename = dirname + "/" + basename + "-undithered-by-" + patternbasename + ".png";
             }
         }
-
-        result = undither(image, thresholdImage);
+        if (strcmp("undither", tcommand) == 0)
+        {
+            result = undither(image, thresholdImage);
+        } else {
+            result = unditherscan(image, thresholdImage);
+        }
 
         result.save(outputFilename.c_str());
         cout << "Saved to " << outputFilename << endl;

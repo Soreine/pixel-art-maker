@@ -28,5 +28,9 @@ You can now undither dithered picture, using for example the `pattern-bubble8.pn
 
 ![Lena undither](examples/lena-undither.jpg)
 
+	$ ./pixam unditherscan lena-bubble.png pattern-bubble8.png lena-undither.jpg
+
+![Lena undither](examples/lena-unditherscan.jpg)
+
 ----  
 https://github.com/Soreine/pixel-art-maker

@@ -25,4 +25,6 @@ CImg<unsigned char> ditherNearest(CImg<unsigned char> const&,
                                   CImg<unsigned char> const&);
 CImg<unsigned char> undither(CImg<unsigned char> const&,
                              CImg<unsigned char> const&);
+CImg<unsigned char> unditherscan(CImg<unsigned char> const&,
+                                 CImg<unsigned char> const&);
 #endif //PIXAM_H//
