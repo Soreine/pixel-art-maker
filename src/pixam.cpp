@@ -606,7 +606,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     // The threshold map (values between 0 and 1)
     double * threshold;
     // The width and height of the threshold map
-    int count = 0;
+    int count = 0, Karea = K * K;
     // The min and max values in the threshold map
     double tMin, tMax, kM;
     // Temporary value
@@ -616,34 +616,29 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
 
     // Init the threshold array
     threshold = new double[K*K];
-    for (i = 0; i < K; i++)
+    for (i = 0; i < Karea; i++)
     {
-        ii = i * K;
-        for (j = 0; j < K; j++)
-        {
-            ij = ii + j;
-            threshold[ij] = 0.0;
-        }
+        threshold[i] = 0.0;
     }
     // For each pixel in the image: sum
     for (y = 0; y < image.height(); y+=K)
     {
         for (x = 0; x < image.width(); x+=K)
         {
+            ii = 0;
             for (i = 0; i < K; i++)
             {
                 yi = y + i;
                 if (yi >= image.height())
                 {
-                    yi = image.height() + image.height() - yi - 1;
+                    yi = image.height() + image.height() - yi - 2;
                 }
-                ii = i * K;
                 for (j = 0; j < K; j++)
                 {
                     xj = x + j;
                     if (xj >= image.width())
                     {
-                        xj = image.width() + image.width() - xj - 1;
+                        xj = image.width() + image.width() - xj - 2;
                     }
                     ij = ii + j;
                     c = getColor(xj, yi, image);
@@ -651,6 +646,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
                     value /= 765.0;
                     threshold[ij] += value;
                 }
+                ii += K;
             }
             count++;
         }
@@ -658,19 +654,14 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     // For each pixel in the pattern: mean
     tMin = 1.0;
     tMax = 0.0;
-    for (i = 0; i < K; i++)
+    for (i = 0; i < Karea; i++)
     {
-        ii = i * K;
-        for (j = 0; j < K; j++)
-        {
-            ij = ii + j;
-            value = threshold[ij];
-            value /= (double)count;
-            value = 1.0 - value;
-            threshold[ij] = value;
-            tMin = (value < tMin) ? value : tMin;
-            tMax = (value > tMax) ? value : tMax;
-        }
+        value = threshold[i];
+        value /= (double)count;
+        value = 1.0 - value;
+        threshold[i] = value;
+        tMin = (value < tMin) ? value : tMin;
+        tMax = (value > tMax) ? value : tMax;
     }
     if ((tMax - tMin) > 0)
     {
@@ -681,9 +672,9 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
         tMax = tMin;
     }
     // For each pixel in the pattern: grayscale
+    ii = 0;
     for (i = 0; i < K; i++)
     {
-        ii = i * K;
         for (j = 0; j < K; j++)
         {
             ij = ii + j;
@@ -697,6 +688,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
             pattern(j, i, 1) = ivalue;
             pattern(j, i, 2) = ivalue;
         }
+        ii += K;
     }
     cout << "Threshold Min " << tMin << " kM " << kM << endl;
     // Return the result
@@ -745,11 +737,11 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
             sx = 0.0;
             sy = 0.0;
             count = 0;
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < image.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < image.width())
@@ -767,6 +759,7 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
             ab = (double)count * sxx - sx * sx;
             a = 0.0;
@@ -787,11 +780,11 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
             scR = 0;
             scG = 0;
             scB = 0;
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < image.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < image.width())
@@ -813,6 +806,7 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
             sv = (sv == 0.0) ? (double)tArea : sv;
             scR /= sv;
@@ -820,15 +814,16 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
             scB /= sv;
             scRGB = scR + scG + scB;
             scRGB = (scRGB > 0) ? scRGB : 383.0;
-            kR = 765.0 * scR / scRGB;
-            kB = 765.0 * scB / scRGB;
-            kG = 765.0 * scG / scRGB;
+            scRGB = 765.0 / scRGB;
+            kR = scR * scRGB;
+            kB = scB * scRGB;
+            kG = scG * scRGB;
             // Unpattern
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < image.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < image.width())
@@ -856,6 +851,7 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
         }
     }
@@ -924,11 +920,11 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
             sx = 0.0;
             sy = 0.0;
             count = 0;
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < undithered.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < undithered.width())
@@ -946,6 +942,7 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
             ab = (double)count * sxx - sx * sx;
             a = 0.0;
@@ -966,11 +963,11 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
             scR = 0;
             scG = 0;
             scB = 0;
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < undithered.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < undithered.width())
@@ -992,6 +989,7 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
             sv = (sv == 0.0) ? (double)tArea : sv;
             scR /= sv;
@@ -999,15 +997,16 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
             scB /= sv;
             scRGB = scR + scG + scB;
             scRGB = (scRGB > 0) ? scRGB : 383.0;
-            kR = 765.0 * scR / scRGB;
-            kB = 765.0 * scB / scRGB;
-            kG = 765.0 * scG / scRGB;
+            scRGB = 765.0 / scRGB;
+            kR = scR * scRGB;
+            kB = scB * scRGB;
+            kG = scG * scRGB;
             // Unpattern
+            ii = 0;
             for (i = 0; i < tHeight; i++)
             {
                 if ((y + i) < undithered.height())
                 {
-                    ii = i * tWidth;
                     for (j = 0; j < tWidth; j++)
                     {
                         if ((x + j) < undithered.width())
@@ -1035,6 +1034,7 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                         }
                     }
                 }
+                ii += tWidth;
             }
         }
     }
