@@ -7,7 +7,7 @@ void usage(const char * progname)
             << "Usage: " << endl
             << "\t" << progname << " command parameters" << endl
             << endl
-            << "Command: palette | dither | undither | unditherscan" << endl
+            << "Command: palette | pattern | dither | undither | unditherscan" << endl
             << endl
             << "Command palette:" << endl
             << endl
@@ -24,6 +24,21 @@ void usage(const char * progname)
             << endl
             << "Result:" << endl
             << "\tAn image containing the palette's colors will be saved." << endl
+            << endl
+            << "Command pattern:" << endl
+            << endl
+            << "\t" << progname << " pattern image.png sizePattern [output.png]" << endl
+            << endl
+            << "This program determines the pattern to use to display an image." << endl
+            << endl
+            << "Parameters:" << endl
+            << "\timage.png: path to the image file (support CImg, recommends PNG)." << endl
+            << "\tsizePattern: size for pattern (sizePattern x sizePattern)" << endl
+            << "\toutput.png: name for the output pattern image file" << endl
+            << "\t\t(default to 'pattern-<sizePattern>-<image>.png')" << endl
+            << endl
+            << "Result:" << endl
+            << "\tAn image containing the pattern will be saved." << endl
             << endl
             << "Command dither:" << endl
             << endl
@@ -139,7 +154,7 @@ int main(int argc, char* argv[])
         result.save(outputFilename.c_str());
         cout << "Saved to " << outputFilename << endl;
     }
-    else if (strcmp("palette", tcommand) == 0)
+    else if ((strcmp("palette", tcommand) == 0) || (strcmp("pattern", tcommand) == 0))
     {
         // The image file path
         char * file;
@@ -151,7 +166,7 @@ int main(int argc, char* argv[])
         CImg<unsigned char> palette;
         // The number of colors in the palette. This correspond to the K of
         // the K-mean algorithm.
-        int K;
+        int K, Ki;
 
         // If not enough arguments were given when called
         if (argc < 4)
@@ -177,27 +192,52 @@ int main(int argc, char* argv[])
             fs::path pathname(file);
             string dirname  = pathname.parent_path().string();
             string basename = pathname.stem().string();
-            if (dirname.length() == 0)
+            if (strcmp("palette", tcommand) == 0)
             {
-                outputFile = "palette-" + ss.str() + "-" + basename + ".png";
-            }
-            else
-            {
-                outputFile = dirname + "/" + "palette-" + ss.str() + "-" + basename + ".png";
+                if (dirname.length() == 0)
+                {
+                    outputFile = "palette-" + ss.str() + "-" + basename + ".png";
+                }
+                else
+                {
+                    outputFile = dirname + "/" + "palette-" + ss.str() + "-" + basename + ".png";
+                }
+            } else {
+                if (dirname.length() == 0)
+                {
+                    outputFile = "pattern-" + ss.str() + "-" + basename + ".png";
+                }
+                else
+                {
+                    outputFile = dirname + "/" + "pattern-" + ss.str() + "-" + basename + ".png";
+                }
             }
         }
-        // Check that K is between 2 and 65536
-        if(K < 2 || K > 65536)
-        {
-            // Error and exit
-            cerr << "*** Color Count must be between 2 and 65536!" << endl << endl;
-            usage(argv[0]);
-        }
-
         // Create the image
         image = CImg<unsigned char>(file);
 
-        palette = generatePalette(image, K);
+        // Check K
+        if (strcmp("palette", tcommand) == 0)
+        {
+            // Check that K is between 2 and 65536
+            if(K < 2 || K > 65536)
+            {
+                // Error and exit
+                cerr << "*** Color Count must be between 2 and 65536!" << endl << endl;
+                usage(argv[0]);
+            }
+            palette = generatePalette(image, K);
+        } else {
+            // Check that K is between 2 and image.size
+            Ki = (image.height() < image.width()) ? image.height() : image.width();
+            if(K < 2 || K > Ki)
+            {
+                // Error and exit
+                cerr << "*** Pattern size must be between 2 and " << Ki << "!" << endl << endl;
+                usage(argv[0]);
+            }
+            palette = generatePattern(image, K);
+        }
 
         // Save the palette image
         palette.save(outputFile.c_str());

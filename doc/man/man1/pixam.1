@@ -15,6 +15,13 @@ pixam \- Pixel Art Maker
 .I output.png
 ]
 .br
+.B pixam pattern
+.RB image.png
+.RB sizePattern
+[
+.I output.png
+]
+.br
 .B pixam dither
 .RB image.png
 .RB palette.png
@@ -55,6 +62,9 @@ path to the image to use as a dithering pattern
 .B colorsCount
 desired number of colors in the palette used
 .TP
+.B sizePattern
+size for pattern (sizePattern x sizePattern)
+.TP
 .I output.png
 result image
 .br
@@ -63,6 +73,12 @@ default for
 :
 .br
 palette-<colorCount>-<image>.png
+.br
+default for
+.I pattern
+:
+.br
+pattern-<sizePattern>-<image>.png
 .br
 default for
 .I dither

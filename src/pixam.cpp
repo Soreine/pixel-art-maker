@@ -592,6 +592,117 @@ CImg<unsigned char> generatePalette(CImg<unsigned char> const image, int const K
     return palette;
 }
 
+/** Generate an return an image containing the pattern. */
+CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K)
+{
+    // The resulting image, reconstructed from the original with the pattern
+    CImg<unsigned char> pattern(K, K, 1, 3, 0);
+
+    // Temporary color variable
+    Color c;
+    // The index in loops
+    int y, x, i, j, yi, xj, ii, ij;
+
+    // The threshold map (values between 0 and 1)
+    double * threshold;
+    // The width and height of the threshold map
+    int count = 0;
+    // The min and max values in the threshold map
+    double tMin, tMax, kM;
+    // Temporary value
+    double value = 0.0;
+    // Selective colors
+    int ivalue;
+
+    // Init the threshold array
+    threshold = new double[K*K];
+    for (i = 0; i < K; i++)
+    {
+        ii = i * K;
+        for (j = 0; j < K; j++)
+        {
+            ij = ii + j;
+            threshold[ij] = 0.0;
+        }
+    }
+    // For each pixel in the image: sum
+    for (y = 0; y < image.height(); y+=K)
+    {
+        for (x = 0; x < image.width(); x+=K)
+        {
+            for (i = 0; i < K; i++)
+            {
+                yi = y + i;
+                if (yi >= image.height())
+                {
+                    yi = image.height() + image.height() - yi - 1;
+                }
+                ii = i * K;
+                for (j = 0; j < K; j++)
+                {
+                    xj = x + j;
+                    if (xj >= image.width())
+                    {
+                        xj = image.width() + image.width() - xj - 1;
+                    }
+                    ij = ii + j;
+                    c = getColor(xj, yi, image);
+                    value = (double) (c.getR() + c.getG() + c.getB());
+                    value /= 765.0;
+                    threshold[ij] += value;
+                }
+            }
+            count++;
+        }
+    }
+    // For each pixel in the pattern: mean
+    tMin = 1.0;
+    tMax = 0.0;
+    for (i = 0; i < K; i++)
+    {
+        ii = i * K;
+        for (j = 0; j < K; j++)
+        {
+            ij = ii + j;
+            value = threshold[ij];
+            value /= (double)count;
+            value = 1.0 - value;
+            threshold[ij] = value;
+            tMin = (value < tMin) ? value : tMin;
+            tMax = (value > tMax) ? value : tMax;
+        }
+    }
+    if ((tMax - tMin) > 0)
+    {
+        kM = 1.0 / (tMax - tMin);
+    } else {
+        kM = 1.0;
+        tMin -= 0.5;
+        tMax = tMin;
+    }
+    // For each pixel in the pattern: grayscale
+    for (i = 0; i < K; i++)
+    {
+        ii = i * K;
+        for (j = 0; j < K; j++)
+        {
+            ij = ii + j;
+            value = threshold[ij];
+            value -= tMin;
+            value *= kM;
+            ivalue = (int) (255.0 * value + 0.5);
+            ivalue = (ivalue < 0) ? 0 : ivalue;
+            ivalue = (ivalue > 255) ? 255 : ivalue;
+            pattern(j, i, 0) = ivalue;
+            pattern(j, i, 1) = ivalue;
+            pattern(j, i, 2) = ivalue;
+        }
+    }
+    cout << "Threshold Min " << tMin << " kM " << kM << endl;
+    // Return the result
+    return pattern;
+}
+
 CImg<unsigned char> undither(CImg<unsigned char> const& image,
                              CImg<unsigned char> const& thresholdImage)
 {
