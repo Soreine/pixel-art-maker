@@ -10,6 +10,13 @@ struct point
     unsigned int cluster;
 };
 
+// Int -> uint8 (0 - 255)
+uint8_t ByteClamp(int c)
+{
+    uint8_t buff[3] = {(uint8_t)c, 255, 0};
+    return buff[ (c < 0) + ((unsigned)c > 255) ];
+}
+
 // Return the p-th value of the 8x8 Bayer threshold matrix
 double bayer8x8(int p)
 {
@@ -608,7 +615,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     // The width and height of the threshold map
     int count = 0, Karea = K * K;
     // The min and max values in the threshold map
-    double tMin, tMax, kM;
+    double tMin, tMax, tMean, tD, kM;
     // Temporary value
     double value = 0.0;
     // Selective colors
@@ -625,6 +632,8 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     {
         for (x = 0; x < image.width(); x+=K)
         {
+            tMean = 0.0;
+            tD = 0.0;
             ii = 0;
             for (i = 0; i < K; i++)
             {
@@ -644,24 +653,60 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
                     c = getColor(xj, yi, image);
                     value = (double) (c.getR() + c.getG() + c.getB());
                     value /= 765.0;
-                    threshold[ij] += value;
+                    tMean += value;
+                    tD += (value * value);
                 }
                 ii += K;
             }
-            count++;
+            tMean /= (double)Karea;
+            tD /= (double)Karea;
+            tD -= (tMean * tMean);
+            if (tD > 0.0)
+            {
+                tD = sqrt(tD);
+                ii = 0;
+                for (i = 0; i < K; i++)
+                {
+                    yi = y + i;
+                    if (yi >= image.height())
+                    {
+                        yi = image.height() + image.height() - yi - 2;
+                    }
+                    for (j = 0; j < K; j++)
+                    {
+                        xj = x + j;
+                        if (xj >= image.width())
+                        {
+                            xj = image.width() + image.width() - xj - 2;
+                        }
+                        ij = ii + j;
+                        c = getColor(xj, yi, image);
+                        value = (double) (c.getR() + c.getG() + c.getB());
+                        value /= 765.0;
+                        value -= tMean;
+                        value /= tD;
+                        threshold[ij] += value;
+                    }
+                    ii += K;
+                }
+                count++;
+            }
         }
     }
-    // For each pixel in the pattern: mean
-    tMin = 1.0;
-    tMax = 0.0;
     for (i = 0; i < Karea; i++)
     {
         value = threshold[i];
         value /= (double)count;
-        value = 1.0 - value;
         threshold[i] = value;
-        tMin = (value < tMin) ? value : tMin;
-        tMax = (value > tMax) ? value : tMax;
+    }
+    // For each pixel in the pattern: mean
+    tMin = threshold[0];
+    tMax = tMin;
+    for (i = 0; i < Karea; i++)
+    {
+        value = threshold[i];
+        tMin = MIN(value, tMin);
+        tMax = MAX(value, tMax);
     }
     if ((tMax - tMin) > 0)
     {
@@ -671,6 +716,14 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
         tMin -= 0.5;
         tMax = tMin;
     }
+    for (i = 0; i < Karea; i++)
+    {
+        value = threshold[i];
+        value -= tMin;
+        value *= kM;
+        value = 1.0 - value;
+        threshold[i] = value;
+    }
     // For each pixel in the pattern: grayscale
     ii = 0;
     for (i = 0; i < K; i++)
@@ -679,11 +732,8 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
         {
             ij = ii + j;
             value = threshold[ij];
-            value -= tMin;
-            value *= kM;
             ivalue = (int) (255.0 * value + 0.5);
-            ivalue = (ivalue < 0) ? 0 : ivalue;
-            ivalue = (ivalue > 255) ? 255 : ivalue;
+            ivalue = ByteClamp(ivalue);
             pattern(j, i, 0) = ivalue;
             pattern(j, i, 1) = ivalue;
             pattern(j, i, 2) = ivalue;
@@ -852,24 +902,21 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                             t += bR;
                             value = (double) c.getR() - t + scR;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 0) = ivalue;
                             t = threshold[ij];
                             t *= aG;
                             t += bG;
                             value = (double) c.getG() - t + scG;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 1) = ivalue;
                             t = threshold[ij];
                             t *= aB;
                             t += bB;
                             value = (double) c.getB() - t + scB;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 2) = ivalue;
                         }
                     }
@@ -1058,24 +1105,21 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                             t += bR;
                             value = (double) c.getR() + (scR - t) * tDiv;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 0) = ivalue;
                             t = threshold[ij];
                             t *= aG;
                             t += bG;
                             value = (double) c.getG() + (scG - t) * tDiv;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 1) = ivalue;
                             t = threshold[ij];
                             t *= aB;
                             t += bB;
                             value = (double) c.getB() + (scB - t) * tDiv;
                             ivalue = (int) (value + 0.5);
-                            ivalue = (ivalue < 0) ? 0 : ivalue;
-                            ivalue = (ivalue > 255) ? 255 : ivalue;
+                            ivalue = ByteClamp(ivalue);
                             undithered(x + j, y + i, 2) = ivalue;
                         }
                     }

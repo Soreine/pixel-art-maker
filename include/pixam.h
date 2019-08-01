@@ -19,6 +19,22 @@ namespace fs = boost::filesystem;
 #include "HSVColor.h"
 #include "Triplet.h"
 
+#ifndef ABS
+#define ABS(A)    ((A) < 0 ? (-(A)) : (A))
+#endif
+
+#ifndef MIN
+#define MIN(a,b)  ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b)  ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef TRIM
+#define TRIM(x,a,b) (MIN(MAX(x,a),b))
+#endif
+
 CImg<unsigned char> generatePalette(CImg<unsigned char> const, int const);
 CImg<unsigned char> generatePattern(CImg<unsigned char> const, int const);
 CImg<unsigned char> ditherNearest(CImg<unsigned char> const&,
