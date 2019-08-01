@@ -615,7 +615,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     int ivalue;
 
     // Init the threshold array
-    threshold = new double[K*K];
+    threshold = new double[Karea];
     for (i = 0; i < Karea; i++)
     {
         threshold[i] = 0.0;
@@ -713,14 +713,14 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
     // The min and max values in the threshold map
     double tMin, tMax;
     // sums OLS
-    double sxy, sx, sy, sxx, t, a, b, ab;
+    double sxyR, sxyG, sxyB, sx, syR, syG, syB, sxx, t, a, b, aR, aG, aB, bR, bG, bB, ab;
     // Temporary value
     double value = 0.0;
     // Statistics
     double sv = 0.0, sa = 0.0, sb = 0.0;
     // Selective colors
     int ivalue;
-    double scR, scG, scB, scRGB, kR, kG, kB;
+    double scR, scG, scB;
 
     // Parse the threshold map
     parseThreshold(thresholdImage, threshold, tWidth, tHeight, tMin, tMax);
@@ -732,10 +732,14 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
         for (x = 0; x < image.width(); x+=tWidth)
         {
             // linear OLS: c = a * pattern + b
-            sxy = 0.0;
+            sxyR = 0.0;
+            sxyG = 0.0;
+            sxyB = 0.0;
             sxx = 0.0;
             sx = 0.0;
-            sy = 0.0;
+            syR = 0.0;
+            syG = 0.0;
+            syB = 0.0;
             count = 0;
             ii = 0;
             for (i = 0; i < tHeight; i++)
@@ -748,13 +752,18 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                         {
                             ij = ii + j;
                             c = getColor(x + j, y + i, image);
-                            value = (double) (c.getR() + c.getG() + c.getB());
-                            value /= 765.0;
                             t = threshold[ij];
                             sx += t;
                             sxx += (t * t);
-                            sy += value;
-                            sxy += (value * t);
+                            value = (double) c.getR();
+                            syR += value;
+                            sxyR += (value * t);
+                            value = (double) c.getG();
+                            syG += value;
+                            sxyG += (value * t);
+                            value = (double) c.getB();
+                            syB += value;
+                            sxyB += (value * t);
                             count++;
                         }
                     }
@@ -762,24 +771,38 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                 ii += tWidth;
             }
             ab = (double)count * sxx - sx * sx;
-            a = 0.0;
-            b = 0.0;
+            aR = 0.0;
+            aG = 0.0;
+            aB = 0.0;
+            bR = 0.0;
+            bG = 0.0;
+            bB = 0.0;
             if (ab == 0)
             {
-                a = 0.0;
-                b = (sy - sx) / (double)count;
+                aR = 0.0;
+                aG = 0.0;
+                aB = 0.0;
+                bR = 127.0 - syR / (double)count;
+                bG = 127.0 - syG / (double)count;
+                bB = 127.0 - syB / (double)count;
             } else {
-                a = ((double)count * sxy - sx * sy) / ab;
-                b = (sy - a * sx) / (double)count;
+                aR = ((double)count * sxyR - sx * syR) / ab;
+                aG = ((double)count * sxyG - sx * syG) / ab;
+                aB = ((double)count * sxyB - sx * syB) / ab;
+                bR = (syR - aR * sx) / (double)count;
+                bG = (syG - aG * sx) / (double)count;
+                bB = (syB - aB * sx) / (double)count;
             }
             // Mean colors
+            a = (aR + aG + aB) / 765.0;
+            b = (bB + bG + bB) / 765.0;
             sa += a;
             sb += b;
             n++;
-            sv = 0;
-            scR = 0;
-            scG = 0;
-            scB = 0;
+            sv = 0.0;
+            scR = 0.0;
+            scG = 0.0;
+            scB = 0.0;
             ii = 0;
             for (i = 0; i < tHeight; i++)
             {
@@ -812,12 +835,6 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
             scR /= sv;
             scG /= sv;
             scB /= sv;
-            scRGB = scR + scG + scB;
-            scRGB = (scRGB > 0) ? scRGB : 383.0;
-            scRGB = 765.0 / scRGB;
-            kR = scR * scRGB;
-            kB = scB * scRGB;
-            kG = scG * scRGB;
             // Unpattern
             ii = 0;
             for (i = 0; i < tHeight; i++)
@@ -831,19 +848,25 @@ CImg<unsigned char> undither(CImg<unsigned char> const& image,
                             ij = ii + j;
                             c = getColor(x + j, y + i, image);
                             t = threshold[ij];
-                            t *= a;
-                            t += b;
-                            value = (double) c.getR() - t * kR + scR;
+                            t *= aR;
+                            t += bR;
+                            value = (double) c.getR() - t + scR;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;
                             undithered(x + j, y + i, 0) = ivalue;
-                            value = (double) c.getG() - t * kG + scG;
+                            t = threshold[ij];
+                            t *= aG;
+                            t += bG;
+                            value = (double) c.getG() - t + scG;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;
                             undithered(x + j, y + i, 1) = ivalue;
-                            value = (double) c.getB() - t * kB + scB;
+                            t = threshold[ij];
+                            t *= aB;
+                            t += bB;
+                            value = (double) c.getB() - t + scB;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;
@@ -878,16 +901,16 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
     // The width and height of the threshold map
     int tWidth, tHeight, tArea, count, n = 0;
     // The min and max values in the threshold map
-    double tMin, tMax;
+    double tMin, tMax, tDiv = 0.25;
     // sums OLS
-    double sxy, sx, sy, sxx, t, a, b, ab;
+    double sxyR, sxyG, sxyB, sx, syR, syG, syB, sxx, t, a, b, aR, aG, aB, bR, bG, bB, ab;
     // Temporary value
     double value = 0.0;
     // Statistics
     double sv = 0.0, sa = 0.0, sb = 0.0;
     // Selective colors
     int ivalue;
-    double scR, scG, scB, scRGB, kR, kG, kB;
+    double scR, scG, scB;
 
     // Parse the threshold map
     parseThreshold(thresholdImage, threshold, tWidth, tHeight, tMin, tMax);
@@ -915,10 +938,14 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
         for (x = 0; x < Xend; x++)
         {
             // linear OLS: c = a * pattern + b
-            sxy = 0.0;
+            sxyR = 0.0;
+            sxyG = 0.0;
+            sxyB = 0.0;
             sxx = 0.0;
             sx = 0.0;
-            sy = 0.0;
+            syR = 0.0;
+            syG = 0.0;
+            syB = 0.0;
             count = 0;
             ii = 0;
             for (i = 0; i < tHeight; i++)
@@ -931,13 +958,18 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                         {
                             ij = ii + j;
                             c = getColor(x + j, y + i, undithered);
-                            value = (double) (c.getR() + c.getG() + c.getB());
-                            value /= 765.0;
                             t = threshold[ij];
                             sx += t;
                             sxx += (t * t);
-                            sy += value;
-                            sxy += (value * t);
+                            value = (double) c.getR();
+                            syR += value;
+                            sxyR += (value * t);
+                            value = (double) c.getG();
+                            syG += value;
+                            sxyG += (value * t);
+                            value = (double) c.getB();
+                            syB += value;
+                            sxyB += (value * t);
                             count++;
                         }
                     }
@@ -945,24 +977,38 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                 ii += tWidth;
             }
             ab = (double)count * sxx - sx * sx;
-            a = 0.0;
-            b = 0.0;
+            aR = 0.0;
+            aG = 0.0;
+            aB = 0.0;
+            bR = 0.0;
+            bG = 0.0;
+            bB = 0.0;
             if (ab == 0)
             {
-                a = 0.0;
-                b = (sy - sx) / (double)count;
+                aR = 0.0;
+                aG = 0.0;
+                aB = 0.0;
+                bR = 127.0 - syR / (double)count;
+                bG = 127.0 - syG / (double)count;
+                bB = 127.0 - syB / (double)count;
             } else {
-                a = ((double)count * sxy - sx * sy) / ab;
-                b = (sy - a * sx) / (double)count;
+                aR = ((double)count * sxyR - sx * syR) / ab;
+                aG = ((double)count * sxyG - sx * syG) / ab;
+                aB = ((double)count * sxyB - sx * syB) / ab;
+                bR = (syR - aR * sx) / (double)count;
+                bG = (syG - aG * sx) / (double)count;
+                bB = (syB - aB * sx) / (double)count;
             }
             // Mean colors
+            a = (aR + aG + aB) / 765.0;
+            b = (bB + bG + bB) / 765.0;
             sa += a;
             sb += b;
             n++;
-            sv = 0;
-            scR = 0;
-            scG = 0;
-            scB = 0;
+            sv = 0.0;
+            scR = 0.0;
+            scG = 0.0;
+            scB = 0.0;
             ii = 0;
             for (i = 0; i < tHeight; i++)
             {
@@ -995,12 +1041,6 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
             scR /= sv;
             scG /= sv;
             scB /= sv;
-            scRGB = scR + scG + scB;
-            scRGB = (scRGB > 0) ? scRGB : 383.0;
-            scRGB = 765.0 / scRGB;
-            kR = scR * scRGB;
-            kB = scB * scRGB;
-            kG = scG * scRGB;
             // Unpattern
             ii = 0;
             for (i = 0; i < tHeight; i++)
@@ -1014,19 +1054,25 @@ CImg<unsigned char> unditherscan(CImg<unsigned char> const& image,
                             ij = ii + j;
                             c = getColor(x + j, y + i, undithered);
                             t = threshold[ij];
-                            t *= a;
-                            t += b;
-                            value = (double) c.getR() - t * kR + scR;
+                            t *= aR;
+                            t += bR;
+                            value = (double) c.getR() + (scR - t) * tDiv;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;
                             undithered(x + j, y + i, 0) = ivalue;
-                            value = (double) c.getG() - t * kG + scG;
+                            t = threshold[ij];
+                            t *= aG;
+                            t += bG;
+                            value = (double) c.getG() + (scG - t) * tDiv;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;
                             undithered(x + j, y + i, 1) = ivalue;
-                            value = (double) c.getB() - t * kB + scB;
+                            t = threshold[ij];
+                            t *= aB;
+                            t += bB;
+                            value = (double) c.getB() + (scB - t) * tDiv;
                             ivalue = (int) (value + 0.5);
                             ivalue = (ivalue < 0) ? 0 : ivalue;
                             ivalue = (ivalue > 255) ? 255 : ivalue;

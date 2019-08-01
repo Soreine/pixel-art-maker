@@ -1,5 +1,9 @@
 Pixel Art Maker
 
+0.0.93 (2019-08-01) <zvezdochiot>
+
+    * undither: split (R,G,B) OLS
+
 0.0.92 (2019-07-31) <zvezdochiot>
 
     * clean code: removed extra multiplications
