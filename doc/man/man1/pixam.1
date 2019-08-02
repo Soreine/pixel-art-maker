@@ -1,4 +1,4 @@
-.TH PIXAM 1 "30 Jul 2019" "0.0.89" "User Manual"
+.TH PIXAM 1 "02 Aug 2019" "0.0.95" "User Manual"
 
 .SH NAME
 pixam \- Pixel Art Maker
@@ -16,6 +16,13 @@ pixam \- Pixel Art Maker
 ]
 .br
 .B pixam pattern
+.RB image.png
+.RB sizePattern
+[
+.I output.png
+]
+.br
+.B pixam patternsymm
 .RB image.png
 .RB sizePattern
 [
@@ -75,7 +82,7 @@ default for
 palette-<colorCount>-<image>.png
 .br
 default for
-.I pattern
+.I pattern | patternsymm
 :
 .br
 pattern-<sizePattern>-<image>.png

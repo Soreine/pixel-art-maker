@@ -37,6 +37,7 @@ namespace fs = boost::filesystem;
 
 CImg<unsigned char> generatePalette(CImg<unsigned char> const, int const);
 CImg<unsigned char> generatePattern(CImg<unsigned char> const, int const);
+CImg<unsigned char> generatePatternSymmetric(CImg<unsigned char> const, int const);
 CImg<unsigned char> ditherNearest(CImg<unsigned char> const&,
                                   CImg<unsigned char> const&,
                                   CImg<unsigned char> const&);

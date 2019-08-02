@@ -7,7 +7,7 @@ void usage(const char * progname)
             << "Usage: " << endl
             << "\t" << progname << " command parameters" << endl
             << endl
-            << "Command: palette | pattern | dither | undither | unditherscan" << endl
+            << "Command: palette | pattern | patternsymm | dither | undither | unditherscan" << endl
             << endl
             << "Command palette:" << endl
             << endl
@@ -25,7 +25,7 @@ void usage(const char * progname)
             << "Result:" << endl
             << "\tAn image containing the palette's colors will be saved." << endl
             << endl
-            << "Command pattern:" << endl
+            << "Command pattern | patternsymm:" << endl
             << endl
             << "\t" << progname << " pattern image.png sizePattern [output.png]" << endl
             << endl
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
         result.save(outputFilename.c_str());
         cout << "Saved to " << outputFilename << endl;
     }
-    else if ((strcmp("palette", tcommand) == 0) || (strcmp("pattern", tcommand) == 0))
+    else if ((strcmp("palette", tcommand) == 0) || (strcmp("pattern", tcommand) == 0) || (strcmp("patternsymm", tcommand) == 0))
     {
         // The image file path
         char * file;
@@ -236,7 +236,12 @@ int main(int argc, char* argv[])
                 cerr << "*** Pattern size must be between 2 and " << Ki << "!" << endl << endl;
                 usage(argv[0]);
             }
-            palette = generatePattern(image, K);
+            if (strcmp("pattern", tcommand) == 0)
+            {
+                palette = generatePattern(image, K);
+            } else {
+                palette = generatePatternSymmetric(image, K);
+            }
         }
 
         // Save the palette image

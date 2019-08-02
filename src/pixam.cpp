@@ -632,6 +632,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
     {
         for (x = 0; x < image.width(); x+=K)
         {
+            // Statistics for block (K x K)
             tMean = 0.0;
             tD = 0.0;
             ii = 0;
@@ -661,6 +662,7 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
             tMean /= (double)Karea;
             tD /= (double)Karea;
             tD -= (tMean * tMean);
+            // Normalize block (K x K) and sum.
             if (tD > 0.0)
             {
                 tD = sqrt(tD);
@@ -741,6 +743,42 @@ CImg<unsigned char> generatePattern(CImg<unsigned char> const image, int const K
         ii += K;
     }
     cout << "Threshold Min " << tMin << " kM " << kM << endl;
+    // Return the result
+    return pattern;
+}
+
+CImg<unsigned char> generatePatternSymmetric(CImg<unsigned char> const image, int const K)
+{
+    CImg<unsigned char> pattern(K, K, 1, 3, 0);
+    // Temporary color variable
+    Color c;
+    // The index in loops
+    int i, j, d;
+    // Temporary value
+    double value = 0.0;
+    // Selective colors
+    int ivalue;
+
+    // No symmetric pattern
+    pattern = generatePattern(image, K);
+    
+    // Symmetric
+    for (i = 0; i < K; i++)
+    {
+        for (j = 0; j < K; j++)
+        {
+            for (d = 0; d < 3; d++)
+            {
+                value = (double)pattern(j, i, d);
+                value += (double)pattern(i, j, d);
+                value *= 0.5;
+                ivalue = (int) (value + 0.5);
+                ivalue = ByteClamp(ivalue);
+                pattern(j, i, d) = ivalue;
+                pattern(i, j, d) = ivalue;
+            }
+        }
+    }
     // Return the result
     return pattern;
 }
