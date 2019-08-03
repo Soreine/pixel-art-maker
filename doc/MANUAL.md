@@ -11,7 +11,7 @@
 - [How does it actually work ?](#how-does-it-actually-work-)
   * [The dithering process](#the-dithering-process)
   * [Making a custom pattern](#making-a-custom-pattern)
-- [Build](#build)
+- [Undithering](#undithering)
 
 
 ## What is it ?
@@ -178,6 +178,28 @@ here are some tips that help making fun patterns :
   draw some 40% gray pixels, then the number of these pixels plus all
   the darker pixels in your pattern should make at least 40% of the
   pixel total.
+
+### Undithering
+
+Origin image
+
+![Dithering image](images/cover.jpg)
+
+	$ ./pixam pattern cover.jpg 5 pattern-5-cover.png
+
+![Pattern 5](images/pattern-5-cover.png)
+
+	$ ./pixam pattern cover.jpg 7 pattern-7-cover.png
+
+![Pattern 7](images/pattern-7-cover.png)
+
+	$ ./pixam unditherscan cover.jpg pattern-5-cover.png cover-undithered-5.jpg
+
+![Undither 5](images/cover-undithered-5.jpg)
+
+	$ ./pixam unditherscan cover-undithered-5.jpg pattern-7-cover.png cover-undithered-5-7.jpg
+
+![Undither 5-7](images/cover-undithered-5-7.jpg)
 
 ----  
 https://github.com/Soreine/pixel-art-maker
