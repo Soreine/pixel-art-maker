@@ -79,14 +79,14 @@ int HSVcompare (HSVColor const& a, HSVColor const& b)
 int HSVcompareL (const void * a, const void * b)
 {
     // Sort by hue
-    double aValue = ((HSVColor*)a)->hsv.h;
-    double bValue = ((HSVColor*)b)->hsv.h;
-    if( aValue > bValue )
-        return 1;
-    else if (aValue < bValue)
-        return -1;
-    else
-        return 0;
+    HSVColor ac, bc;
+    ac.hsv.v = ((HSVColor*)a)->hsv.v;
+    ac.hsv.s = ((HSVColor*)a)->hsv.s;
+    ac.hsv.h = ((HSVColor*)a)->hsv.h;
+    bc.hsv.v = ((HSVColor*)b)->hsv.v;
+    bc.hsv.s = ((HSVColor*)b)->hsv.s;
+    bc.hsv.h = ((HSVColor*)b)->hsv.h;
+    return HSVcompare (ac, bc);
 }
 
 /** Parse a palette image and fill the palette Color array with all
@@ -761,7 +761,7 @@ CImg<unsigned char> generatePatternSymmetric(CImg<unsigned char> const image, in
 
     // No symmetric pattern
     pattern = generatePattern(image, K);
-    
+
     // Symmetric
     for (i = 0; i < K; i++)
     {
