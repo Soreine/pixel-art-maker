@@ -1,3 +1,9 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ImageProcessing-ElectronicPublications/pixel-art-maker)
+![GitHub Release Date](https://img.shields.io/github/release-date/ImageProcessing-ElectronicPublications/pixel-art-maker)
+![GitHub repo size](https://img.shields.io/github/repo-size/ImageProcessing-ElectronicPublications/pixel-art-maker)
+![GitHub all releases](https://img.shields.io/github/downloads/ImageProcessing-ElectronicPublications/jpegquant/pixel-art-maker)
+![GitHub](https://img.shields.io/github/license/ImageProcessing-ElectronicPublications/pixel-art-maker)
+
 # Pixel Art Maker
 
 Generate palettes and dither any image with personal patterns.
