@@ -1,6 +1,6 @@
 # Pixel Art Maker
 
-Generate palettes and dither any image with personal patterns.
+Generate palettes and dither any image with custom patterns.
 
 ![Example](readme/process.png)
 
